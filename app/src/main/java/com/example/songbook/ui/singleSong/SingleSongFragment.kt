@@ -1,4 +1,4 @@
-package com.example.songbook.fragments
+package com.example.songbook.ui.singleSong
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import com.example.songbook.R
 import com.example.songbook.contract.*
 
-class ItemFragment : Fragment(), HasCustomTitle {
+class SingleSongFragment : Fragment(), HasCustomTitle {
 
     private lateinit var title : String
 
@@ -22,11 +22,7 @@ class ItemFragment : Fragment(), HasCustomTitle {
         val selectedTitle = args?.getString(KEY_ITEMS)
         title = selectedTitle.toString()
 
-        return inflater.inflate(R.layout.fragment_item, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        return inflater.inflate(R.layout.fragment_single_song, container, false)
     }
 
     override fun getTitleRes(): String = title
@@ -35,10 +31,10 @@ class ItemFragment : Fragment(), HasCustomTitle {
         @JvmStatic private val KEY_ITEMS = "KEY_ITEMS"
 
         @JvmStatic
-        fun newInstance(song_name: String) : ItemFragment {
+        fun newInstance(song_name: String) : SingleSongFragment {
             val args = Bundle()
             args.putString(KEY_ITEMS, song_name)
-            val fragment = ItemFragment()
+            val fragment = SingleSongFragment()
             fragment.arguments = args
             return fragment
         }

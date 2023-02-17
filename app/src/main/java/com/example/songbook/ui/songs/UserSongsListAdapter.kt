@@ -1,28 +1,22 @@
-package com.example.songbook
+package com.example.songbook.ui.songs
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.example.songbook.R
+import com.example.songbook.data.Song
 import com.example.songbook.databinding.ItemSongBinding
-import com.example.songbook.fragments.ItemFragment
-import com.example.songbook.fragments.SongsFragment
+import com.example.songbook.ui.singleSong.SingleSongFragment
 
 class UserSongsListAdapter(
-    var songsList: List<SongData>
-): RecyclerView.Adapter<UserSongsListAdapter.UserSongsViewHolder>() {
-
+    var songsList: List<Song>
+) : RecyclerView.Adapter<UserSongsListAdapter.UserSongsViewHolder>() {
 
     class UserSongsViewHolder(item: View): RecyclerView.ViewHolder(item) {
         val binding = ItemSongBinding.bind(item)
-        var songName: TextView
-
-        init {
-            songName = binding.tvUserBand
-        }
+        var songName = binding.tvUserBand
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserSongsViewHolder {
@@ -39,7 +33,7 @@ class UserSongsListAdapter(
             activity.supportFragmentManager
                 .beginTransaction()
                 .addToBackStack(null)
-                .replace(R.id.nav_host_fragment_activity_main, ItemFragment.newInstance(newTitle))
+                .replace(R.id.nav_host_fragment, SingleSongFragment.newInstance(newTitle))
                 .commit()
         }
     }

@@ -5,7 +5,7 @@
     android:id="@+id/songs_place_holder"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.SongsFragment">
+    tools:context=".ui.songs.SongsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycleViewSongs"

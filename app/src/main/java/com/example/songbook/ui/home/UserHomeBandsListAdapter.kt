@@ -1,26 +1,22 @@
-package com.example.songbook
+package com.example.songbook.ui.home
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.RecyclerView
+import com.example.songbook.R
+import com.example.songbook.data.Band
 import com.example.songbook.databinding.ItemSongBinding
-import com.example.songbook.fragments.SongsFragment
+import com.example.songbook.ui.songs.SongsFragment
 
-class UserBandsListAdapter(
-    var bandsList: List<BandData>
-) : RecyclerView.Adapter<UserBandsListAdapter.UserBandsViewHolder>() {
+class UserHomeBandsListAdapter(
+    var bandsList: List<Band>
+) : RecyclerView.Adapter<UserHomeBandsListAdapter.UserBandsViewHolder>() {
 
     class UserBandsViewHolder(item: View) : RecyclerView.ViewHolder(item) {
-        var bandName: TextView
         private val binding = ItemSongBinding.bind(item)
-
-        init {
-            bandName = binding.tvUserBand
-        }
+        var bandName = binding.tvUserBand
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserBandsViewHolder {
@@ -37,11 +33,9 @@ class UserBandsListAdapter(
             activity.supportFragmentManager
                 .beginTransaction()
                 .addToBackStack(null)
-                .replace(R.id.nav_host_fragment_activity_main, SongsFragment.newInstance(newTitle))
+                .replace(R.id.nav_host_fragment, SongsFragment.newInstance(newTitle))
                 .commit()
-
         }
-
     }
 
     override fun getItemCount(): Int {

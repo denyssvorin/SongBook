@@ -1,45 +1,55 @@
 package com.example.songbook.ui.home
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.songbook.R
 import com.example.songbook.data.Band
-import com.example.songbook.databinding.ItemSongBinding
-import com.example.songbook.ui.songs.SongsFragment
+import com.example.songbook.databinding.ListItemBinding
 
-class UserHomeBandsListAdapter(
-    var bandsList: List<Band>
-) : RecyclerView.Adapter<UserHomeBandsListAdapter.UserBandsViewHolder>() {
-
-    class UserBandsViewHolder(item: View) : RecyclerView.ViewHolder(item) {
-        private val binding = ItemSongBinding.bind(item)
-        var bandName = binding.tvUserBand
-    }
+class UserHomeBandsListAdapter (private val listener: OnItemClickListener)
+    : ListAdapter<Band, UserHomeBandsListAdapter.UserBandsViewHolder>(DiffBandsCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserBandsViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_song, parent,false)
-        return UserBandsViewHolder(view)
+        val binding = ListItemBinding.inflate(LayoutInflater.from(parent.context), parent,false)
+        return UserBandsViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: UserBandsViewHolder, position: Int) {
-        holder.bandName.text = bandsList[position].bandName
+        val currentItem = getItem(position)
+        holder.bind(currentItem)
+    }
 
-        holder.bandName.setOnClickListener { p0 ->
-            val newTitle =  holder.bandName.text.toString()
-            val activity = p0!!.context as AppCompatActivity
-            activity.supportFragmentManager
-                .beginTransaction()
-                .addToBackStack(null)
-                .replace(R.id.nav_host_fragment, SongsFragment.newInstance(newTitle))
-                .commit()
+    inner class UserBandsViewHolder(private val binding: ListItemBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.apply {
+                root.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        val band = getItem(position)
+                        listener.onItemClick(band)
+                    }
+                }
+            }
+        }
+
+        fun bind(band: Band) {
+            binding.textViewListItem.text = band.bandName
         }
     }
 
-    override fun getItemCount(): Int {
-        return bandsList.size
+    interface OnItemClickListener {
+        fun onItemClick(band: Band)
+    }
+
+    class DiffBandsCallback : DiffUtil.ItemCallback<Band>() {
+        override fun areItemsTheSame(oldItem: Band, newItem: Band) =
+            oldItem.id == newItem.id
+
+        override fun areContentsTheSame(oldItem: Band, newItem: Band) =
+            oldItem == newItem
     }
 
 }

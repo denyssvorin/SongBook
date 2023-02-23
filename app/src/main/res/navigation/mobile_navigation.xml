@@ -9,7 +9,11 @@
         android:id="@+id/navigation_home"
         android:name="com.example.songbook.ui.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_navigation_home_to_songsFragment"
+            app:destination="@id/songsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_favorite"
@@ -22,5 +26,26 @@
         android:name="com.example.songbook.ui.settings.SettingsFragment"
         android:label="@string/title_settings"
         tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/songsFragment"
+        android:name="com.example.songbook.ui.songs.SongsFragment"
+        android:label="fragment_songs"
+        tools:layout="@layout/fragment_songs" >
+        <argument
+            android:name="band"
+            app:argType="com.example.songbook.data.Band" />
+        <action
+            android:id="@+id/action_songsFragment_to_singleSongFragment"
+            app:destination="@id/singleSongFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/singleSongFragment"
+        android:name="com.example.songbook.ui.singleSong.SingleSongFragment"
+        android:label="fragment_single_song"
+        tools:layout="@layout/fragment_single_song" >
+        <argument
+            android:name="song"
+            app:argType="com.example.songbook.data.Song"/>
+    </fragment>
 
 </navigation>

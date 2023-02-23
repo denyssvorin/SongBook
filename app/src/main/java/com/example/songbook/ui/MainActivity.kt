@@ -20,9 +20,10 @@ import com.example.songbook.contract.*
 import com.example.songbook.databinding.ActivityMainBinding
 import com.example.songbook.ui.home.HomeFragment
 import com.example.songbook.ui.songs.SongsFragment
+import dagger.hilt.android.AndroidEntryPoint
 
-
-class MainActivity : AppCompatActivity(), Navigator {
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
@@ -44,13 +45,6 @@ class MainActivity : AppCompatActivity(), Navigator {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (savedInstanceState == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .add(R.id.nav_host_fragment, HomeFragment())
-                .commit()
-        }
-
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, false)
 
         val navHostFragment =
@@ -69,33 +63,6 @@ class MainActivity : AppCompatActivity(), Navigator {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
-    }
-
-    override fun goBack() {
-        onBackPressed()
-    }
-
-    override fun showSongsList(item_name: String) {
-        launchFragment(SongsFragment.newInstance(item_name))
-    }
-
-
-    override fun openFragmentFromBottomNav(fragment: Fragment) {
-        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.nav_host_fragment, fragment)
-            .commit()
-
-
-    }
-
-
-    private fun launchFragment(fragment: Fragment) {
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.nav_host_fragment, fragment)
-            .commit()
     }
 
     private fun updateUi() {
@@ -139,9 +106,5 @@ class MainActivity : AppCompatActivity(), Navigator {
             action.onCustomAction.run()
             return@setOnMenuItemClickListener true
         }
-    }
-
-    companion object {
-        @JvmStatic private val KEY_RESULT = "RESULT"
     }
 }

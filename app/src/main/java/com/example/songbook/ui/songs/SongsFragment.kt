@@ -5,32 +5,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.songbook.*
 import com.example.songbook.contract.CustomAction
 import com.example.songbook.contract.HasCustomActions
 import com.example.songbook.contract.HasCustomTitle
-import com.example.songbook.contract.navigator
 import com.example.songbook.data.Song
 import com.example.songbook.databinding.FragmentSongsBinding
+import dagger.hilt.android.AndroidEntryPoint
 
-class SongsFragment : Fragment(), HasCustomTitle, HasCustomActions {
+@AndroidEntryPoint
+class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener, HasCustomTitle, HasCustomActions {
 
     private var _binding: FragmentSongsBinding? = null
     lateinit var title : String
-    val songsList = mutableListOf(
-        Song(0,"Song"),
-        Song(1,"Song1"),
-        Song(2,"Song2"),
-        Song(3,"Song3"),
-        Song(4,"Song4"),
-        Song(5,"Song5"),
-        Song(6,"Song6"),
-        Song(7,"Song7"),
-        Song(8,"Song8"),
-        Song(9,"Song9"),
-        Song(10,"Song10"),
-    )
+
+    private val viewModel : SongsViewModel by viewModels()
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -42,22 +35,37 @@ class SongsFragment : Fragment(), HasCustomTitle, HasCustomActions {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSongsBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
         val args = this.arguments
         val selectedTitle = args?.getString(KEY_SONGS)
         title = selectedTitle.toString()
 
-        return root
+        return binding.root
     }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val myAdapter = UserSongsListAdapter(songsList)
+        val songFragment = UserSongsListAdapter(this)
+
         binding.recycleViewSongs.apply {
             layoutManager = LinearLayoutManager(activity)
-            adapter = myAdapter
+            adapter = songFragment
+        }
+
+        viewModel.songs.observe(viewLifecycleOwner) {
+            songFragment.submitList(it)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.songsEvent.collect() { event ->
+                 when (event) {
+                     is SongsViewModel.SongsEvent.NavigateToSingleSongScreen -> {
+                         val action = SongsFragmentDirections.actionSongsFragmentToSingleSongFragment(event.song)
+                         findNavController().navigate(action)
+                     }
+                 }
+            }
         }
 
     }
@@ -74,14 +82,9 @@ class SongsFragment : Fragment(), HasCustomTitle, HasCustomActions {
                 iconRes = R.drawable.ic_search_24,
                 textRes = R.string.search,
                 onCustomAction = Runnable {
-                    onConfirmPressed()
+                    // action
                 }
             )
-    }
-
-
-    private fun onConfirmPressed() {
-        navigator().goBack()
     }
 
     companion object {
@@ -96,4 +99,9 @@ class SongsFragment : Fragment(), HasCustomTitle, HasCustomActions {
             return fragment
         }
     }
+
+    override fun onItemClick(song: Song) {
+        viewModel.onSongSelected(song)
+    }
+
 }

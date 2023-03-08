@@ -5,14 +5,16 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.songbook.R
 import com.example.songbook.data.Song
-import com.example.songbook.databinding.ListItemBinding
+import com.example.songbook.data.relations.BandWithSongs
+import com.example.songbook.databinding.SongItemBinding
 
 class UserSongsListAdapter(private val listener: OnItemClickListener)
     : ListAdapter<Song, UserSongsListAdapter.UserSongsViewHolder>(DiffSongsCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserSongsViewHolder {
-        val binding = ListItemBinding.inflate( LayoutInflater.from(parent.context), parent,false)
+        val binding = SongItemBinding.inflate( LayoutInflater.from(parent.context), parent,false)
         return UserSongsViewHolder(binding)
     }
 
@@ -22,7 +24,7 @@ class UserSongsListAdapter(private val listener: OnItemClickListener)
     }
 
 
-    inner class UserSongsViewHolder(private val binding: ListItemBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class UserSongsViewHolder(private val binding: SongItemBinding): RecyclerView.ViewHolder(binding.root) {
         init {
             binding.apply {
                 root.setOnClickListener {
@@ -32,23 +34,32 @@ class UserSongsListAdapter(private val listener: OnItemClickListener)
                         listener.onItemClick(song)
                     }
                 }
+                iconAddToFavorite.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        val song = getItem(position)
+                        listener.addToFavorite(song, iconAddToFavorite.isChecked)
+                    }
+                }
             }
         }
         fun bind(song: Song) {
-            binding.textViewListItem.text = song.songName
-            // add_to_favorite logic
+            binding.apply {
+                textViewSongItem.text = song.songName
+                iconAddToFavorite.isChecked = song.isFavorite
+            }
         }
     }
 
     interface OnItemClickListener {
         fun onItemClick(song: Song)
 
-        // implement add_to_favorite logic
+        fun addToFavorite(song: Song, isFavorite: Boolean)
     }
 
     class DiffSongsCallback: DiffUtil.ItemCallback<Song>() {
         override fun areItemsTheSame(oldItem: Song, newItem: Song): Boolean =
-            oldItem.id == newItem.id
+            oldItem.songName == newItem.songName
 
         override fun areContentsTheSame(oldItem: Song, newItem: Song): Boolean =
             oldItem == newItem

@@ -1,28 +1,27 @@
-package com.example.songbook.ui.home
+package com.example.songbook.ui.favorite
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.songbook.data.Band
 import com.example.songbook.data.relations.BandWithSongs
 import com.example.songbook.databinding.BandItemBinding
 
-class UserHomeBandsListAdapter (private val listener: OnItemClickListener)
-    : ListAdapter<BandWithSongs, UserHomeBandsListAdapter.UserBandsViewHolder>(DiffBandsCallback()) {
+class FavoriteListAdapter(private val listener: OnItemClickListener):
+    ListAdapter<BandWithSongs, FavoriteListAdapter.FavoriteBandsViewHolder>(DiffBandsCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserBandsViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteBandsViewHolder {
         val binding = BandItemBinding.inflate(LayoutInflater.from(parent.context), parent,false)
-        return UserBandsViewHolder(binding)
+        return FavoriteBandsViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: UserBandsViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: FavoriteBandsViewHolder, position: Int) {
         val currentItem = getItem(position)
         holder.bind(currentItem)
     }
 
-    inner class UserBandsViewHolder(private val binding: BandItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class FavoriteBandsViewHolder(private val binding: BandItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
         init {
             binding.apply {

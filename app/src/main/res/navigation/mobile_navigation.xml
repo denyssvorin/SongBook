@@ -19,7 +19,11 @@
         android:id="@+id/navigation_favorite"
         android:name="com.example.songbook.ui.favorite.FavoriteFragment"
         android:label="@string/title_favorite"
-        tools:layout="@layout/fragment_favorite" />
+        tools:layout="@layout/fragment_favorite" >
+        <action
+            android:id="@+id/action_navigation_favorite_to_songsFragment"
+            app:destination="@id/songsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_settings"
@@ -29,11 +33,14 @@
     <fragment
         android:id="@+id/songsFragment"
         android:name="com.example.songbook.ui.songs.SongsFragment"
-        android:label="fragment_songs"
+        android:label="{bandName}"
         tools:layout="@layout/fragment_songs" >
         <argument
-            android:name="band"
-            app:argType="com.example.songbook.data.Band" />
+            android:name="bandWithSongs"
+            app:argType="com.example.songbook.data.relations.BandWithSongs" />
+        <argument
+            android:name="bandName"
+            app:argType="string"/>
         <action
             android:id="@+id/action_songsFragment_to_singleSongFragment"
             app:destination="@id/singleSongFragment" />
@@ -41,11 +48,14 @@
     <fragment
         android:id="@+id/singleSongFragment"
         android:name="com.example.songbook.ui.singleSong.SingleSongFragment"
-        android:label="fragment_single_song"
+        android:label="{songName}"
         tools:layout="@layout/fragment_single_song" >
         <argument
             android:name="song"
             app:argType="com.example.songbook.data.Song"/>
+        <argument
+            android:name="songName"
+            app:argType="string"/>
     </fragment>
 
 </navigation>

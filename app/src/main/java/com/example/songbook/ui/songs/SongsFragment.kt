@@ -1,27 +1,30 @@
 package com.example.songbook.ui.songs
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.Toast
+import androidx.appcompat.widget.SearchView
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.songbook.*
-import com.example.songbook.contract.CustomAction
-import com.example.songbook.contract.HasCustomActions
-import com.example.songbook.contract.HasCustomTitle
 import com.example.songbook.data.Song
 import com.example.songbook.databinding.FragmentSongsBinding
+import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener, HasCustomTitle, HasCustomActions {
+class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
 
     private var _binding: FragmentSongsBinding? = null
-    lateinit var title : String
+    private lateinit var searchView: SearchView
+    private val args: SongsFragmentArgs by navArgs()
 
     private val viewModel : SongsViewModel by viewModels()
 
@@ -35,39 +38,69 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener, HasC
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSongsBinding.inflate(inflater, container, false)
-
-        val args = this.arguments
-        val selectedTitle = args?.getString(KEY_SONGS)
-        title = selectedTitle.toString()
-
+        setupMenu()
         return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val songFragment = UserSongsListAdapter(this)
+
+        val songAdapter = UserSongsListAdapter(this)
 
         binding.recycleViewSongs.apply {
             layoutManager = LinearLayoutManager(activity)
-            adapter = songFragment
+            adapter = songAdapter
         }
 
-        viewModel.songs.observe(viewLifecycleOwner) {
-            songFragment.submitList(it)
+        viewModel.bandWithSongs.observe(viewLifecycleOwner) {
+            songAdapter.submitList(it.songs)
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.songsEvent.collect() { event ->
                  when (event) {
                      is SongsViewModel.SongsEvent.NavigateToSingleSongScreen -> {
-                         val action = SongsFragmentDirections.actionSongsFragmentToSingleSongFragment(event.song)
+                         val action = SongsFragmentDirections.actionSongsFragmentToSingleSongFragment(event.song, event.song.songName)
                          findNavController().navigate(action)
                      }
                  }
             }
         }
 
+        viewModel.onBandLoaded(args.bandWithSongs)
+
+    }
+
+    private fun setupMenu() {
+        (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
+
+            override fun onPrepareMenu(menu: Menu) {
+                super.onPrepareMenu(menu)
+                val favoriteIcon = menu.findItem(R.id.action_add_to_favorite)
+                favoriteIcon.isVisible = false
+            }
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.top_app_bar, menu)
+
+                val search = menu.findItem(R.id.action_search)
+                searchView = search.actionView as SearchView
+
+                val pendingQuery = viewModel.searchQuery.value
+                if (pendingQuery.isNotEmpty()) {
+                    search.expandActionView()
+                    searchView.setQuery(pendingQuery, false)
+                }
+                searchView.onQueryTextChanged {
+                    viewModel.searchQuery.value = it
+                }
+
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return false
+            }
+
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     override fun onDestroyView() {
@@ -75,33 +108,11 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener, HasC
         _binding = null
     }
 
-    override fun getTitleRes(): String = title
-
-    override fun getCustomAction(): CustomAction {
-            return CustomAction(
-                iconRes = R.drawable.ic_search_24,
-                textRes = R.string.search,
-                onCustomAction = Runnable {
-                    // action
-                }
-            )
-    }
-
-    companion object {
-        @JvmStatic private val KEY_SONGS = "KEY_SONGS"
-
-        @JvmStatic
-        fun newInstance(band_name: String) : SongsFragment {
-            val args = Bundle()
-            args.putString(KEY_SONGS, band_name)
-            val fragment = SongsFragment()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-
     override fun onItemClick(song: Song) {
         viewModel.onSongSelected(song)
     }
 
+    override fun addToFavorite(song: Song, isFavorite: Boolean) {
+        viewModel.addToFavorite(song, isFavorite)
+    }
 }

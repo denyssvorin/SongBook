@@ -5,11 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.songbook.R
-import com.example.songbook.contract.HasCustomTitle
 import com.example.songbook.databinding.FragmentSettingsBinding
 
-class SettingsFragment : Fragment(), HasCustomTitle {
+class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
 
@@ -31,6 +29,4 @@ class SettingsFragment : Fragment(), HasCustomTitle {
         super.onDestroyView()
         _binding = null
     }
-
-    override fun getTitleRes(): String = getString(R.string.title_settings)
 }

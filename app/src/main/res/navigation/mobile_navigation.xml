@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_navigation_favorite_to_songsFragment"
             app:destination="@id/songsFragment" />
+        <action
+            android:id="@+id/action_navigation_favorite_to_favoriteSongsFragment"
+            app:destination="@id/favoriteSongsFragment" />
     </fragment>
 
     <fragment
@@ -56,6 +59,21 @@
         <argument
             android:name="songName"
             app:argType="string"/>
+    </fragment>
+    <fragment
+        android:id="@+id/favoriteSongsFragment"
+        android:name="com.example.songbook.ui.favorite.FavoriteSongsFragment"
+        android:label="{bandName}"
+        tools:layout="@layout/fragment_favorite_songs" >
+        <argument
+            android:name="bandWithSongs"
+            app:argType="com.example.songbook.data.relations.BandWithSongs" />
+        <argument
+            android:name="bandName"
+            app:argType="string"/>
+        <action
+            android:id="@+id/action_favoriteSongsFragment_to_singleSongFragment"
+            app:destination="@id/singleSongFragment" />
     </fragment>
 
 </navigation>

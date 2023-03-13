@@ -12,5 +12,4 @@ import kotlin.random.nextInt
 @Parcelize
 data class Band (
     @PrimaryKey(autoGenerate = false) val bandName: String,
-    //val id: Int = Random.nextInt(1..3)
 ) : Parcelable

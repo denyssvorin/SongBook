@@ -21,7 +21,9 @@ import com.example.songbook.ui.songs.SongsFragmentDirections
 import com.example.songbook.ui.songs.SongsViewModel
 import com.example.songbook.ui.songs.UserSongsListAdapter
 import com.example.songbook.util.onQueryTextChanged
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener{
 
     private var _binding: FragmentFavoriteSongsBinding? = null
@@ -46,13 +48,15 @@ class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListen
 
         val songAdapter = UserSongsListAdapter(this)
 
+        val receivedList = args.bandWithSongs.songs
+
         binding.recycleViewFavoriteSongs.apply {
             layoutManager = LinearLayoutManager(activity)
             adapter = songAdapter
         }
 
-        viewModel.songs.observe(viewLifecycleOwner) {
-            songAdapter.submitList(args.bandWithSongs.songs)
+        viewModel.bandWithSongs.observe(viewLifecycleOwner) {
+            songAdapter.submitList(receivedList)
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {

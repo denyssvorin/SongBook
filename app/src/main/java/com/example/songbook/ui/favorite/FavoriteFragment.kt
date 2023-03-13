@@ -55,8 +55,9 @@ class FavoriteFragment : Fragment(), FavoriteListAdapter.OnItemClickListener {
             viewModel.favBandsEvent.collect() { event ->
                 when (event) {
                     is FavoriteViewModel.FavEvent.NavigateToFavSongsScreen -> {
-                       val action = FavoriteFragmentDirections.actionNavigationFavoriteToSongsFragment(event.bandWithSongs,
-                           event.bandWithSongs.band.bandName)
+                       val action = FavoriteFragmentDirections
+                           .actionNavigationFavoriteToFavoriteSongsFragment(event.bandWithSongs,
+                               event.bandWithSongs.band.bandName)
                         findNavController().navigate(action)
                     }
                 }

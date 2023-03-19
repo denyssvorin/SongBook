@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,7 +22,15 @@ class FavoriteViewModel @Inject constructor(
 
     val searchQuery = MutableStateFlow("")
 
-    private val favBandsFlow = searchQuery.flatMapLatest { appDao.getFavoriteBands(it) }
+    private val favBandsFlow = searchQuery.flatMapLatest {
+        appDao.getBandWithSongs(it).map { mainList ->
+            mainList.filter { bandWithSongs ->
+                bandWithSongs.songs.map { song -> song.isFavorite }.contains(true)
+            }.map { favBand ->
+                favBand.copy(songs = favBand.songs.filter { it.isFavorite })
+            }
+        }
+    }
     val favBands = favBandsFlow.asLiveData()
 
     private val favBandsEventChannel = Channel<FavEvent>()

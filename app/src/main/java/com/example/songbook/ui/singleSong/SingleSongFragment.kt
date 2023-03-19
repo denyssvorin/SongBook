@@ -9,7 +9,9 @@ import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import com.example.songbook.R
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SingleSongFragment : Fragment() {
 
     private val args : SingleSongFragmentArgs by navArgs()

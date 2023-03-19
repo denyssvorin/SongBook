@@ -17,12 +17,12 @@ interface AppDao {
     @Query("SELECT * FROM band_table WHERE bandName LIKE '%' || :searchQuery || '%' ORDER BY bandName")
     fun getBandWithSongs(searchQuery: String) : Flow<List<BandWithSongs>>
 
-    @Transaction
-    @Query("SELECT DISTINCT bandName FROM song_table WHERE bandName LIKE '%' || :searchQuery || '%' AND isFavorite = 1 ORDER BY bandName")
-    fun getFavoriteBands(searchQuery: String) : Flow<List<BandWithSongs>>
-
-    @Query("SELECT * FROM song_table WHERE songName LIKE '%' || :searchQuery || '%' AND isFavorite = 0 ORDER BY songName")
-    fun getFavoriteSongs(searchQuery: String) : Flow<List<BandWithSongs>>
+//    @Transaction
+//    @Query("SELECT DISTINCT bandName FROM song_table WHERE bandName LIKE '%' || :searchQuery || '%' AND isFavorite = 1 ORDER BY bandName")
+//    fun getFavoriteBands(searchQuery: String) : Flow<List<BandWithSongs>>
+//
+//    @Query("SELECT * FROM song_table WHERE songName LIKE '%' || :searchQuery || '%' AND isFavorite = 0 ORDER BY songName")
+//    fun getFavoriteSongs(searchQuery: String) : Flow<List<BandWithSongs>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBand(band: Band)

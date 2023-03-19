@@ -11,4 +11,7 @@
     <color name="light_color_toolbar">#F0E6FA</color>
     <color name="dark_color_toolbar">#403548</color>
     <color name="dark_color_status_bar">#4d4057</color>
+
+    <color name="icon_color_light">#FFF</color>
+    <color name="icon_color_dark">#000</color>
 </resources>

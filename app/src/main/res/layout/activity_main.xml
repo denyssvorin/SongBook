@@ -9,14 +9,13 @@
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/light_color_toolbar"
         app:layout_constraintBottom_toTopOf="@+id/nav_host_fragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/top_app_bar"
-        app:title="@string/page_title"/>
-<!--        app:popupTheme="@style/Theme.AppCompat.DayNight.NoActionBar"-->
+        app:title="@string/page_title"
+        app:popupTheme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"

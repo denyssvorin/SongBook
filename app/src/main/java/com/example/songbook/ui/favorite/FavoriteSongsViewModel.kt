@@ -22,10 +22,10 @@ class FavoriteSongsViewModel @Inject constructor(
         get() = _bandWithSongs
 
     val searchQuery = MutableStateFlow("")
-    private val songsFlow = searchQuery.flatMapLatest {
-        appDao.getFavoriteSongs(it)
-    }
-    val songs = songsFlow.asLiveData()
+//    private val songsFlow = searchQuery.flatMapLatest {
+//        appDao.getFavoriteSongs(it)
+//    }
+//    val songs = songsFlow.asLiveData()
 
     private val songsEventChannel = Channel<SongsEvent>()
     val songsEvent = songsEventChannel.receiveAsFlow()

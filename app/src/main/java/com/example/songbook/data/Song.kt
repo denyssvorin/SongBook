@@ -12,4 +12,5 @@ data class Song (
     @PrimaryKey(autoGenerate = false) val songName: String,
     val bandName: String,
     val isFavorite: Boolean = false,
+    val textSong: String = "TEXT OF SONG"
     ): Parcelable

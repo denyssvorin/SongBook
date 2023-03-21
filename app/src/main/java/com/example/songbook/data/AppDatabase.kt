@@ -38,7 +38,8 @@ abstract class AppDatabase: RoomDatabase() {
             }
 
             applicationScope.launch {
-                appDao.insertSong(Song("some text1","Band1"))
+                appDao.insertSong(Song("some text1","Band1", textSong = "Lorem ipsum dolor sit amet, \nconsectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
+                        "\n\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum"))
                 appDao.insertSong(Song("some group11","Band1"))
                 appDao.insertSong(Song("some Song111", "Band2"))
                 appDao.insertSong(Song("some Song", "Band2"))

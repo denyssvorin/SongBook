@@ -1,12 +1,15 @@
 package com.example.songbook.ui.singleSong
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.songbook.data.AppDao
 import com.example.songbook.data.Song
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,6 +34,17 @@ class SingleSongViewModel @Inject constructor(
                 }
             }
             isFavorite = !isFavorite
+        }
+    }
+
+    private val _textSong = MutableLiveData<String>()
+    val textSong: LiveData<String>
+        get() = _textSong
+
+    fun getSongBySongName(song: String) = viewModelScope.launch {
+        val flow = appDao.getTextSong(song)
+        flow.collect { text ->
+            _textSong.value = text
         }
     }
 }

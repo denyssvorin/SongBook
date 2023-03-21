@@ -6,25 +6,39 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import com.example.songbook.R
+import com.example.songbook.databinding.FragmentSingleSongBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SingleSongFragment : Fragment() {
 
     private val args : SingleSongFragmentArgs by navArgs()
-    private var isFavorite : Boolean = false
+    private val viewModel : SingleSongViewModel by viewModels()
 
+    private var _binding : FragmentSingleSongBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
+        _binding = FragmentSingleSongBinding.inflate(inflater, container, false)
         setupMenu()
-        return inflater.inflate(R.layout.fragment_single_song, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel.textSong.observe(viewLifecycleOwner) { text ->
+            binding.textViewTextSong.text = text
+        }
+
+        viewModel.getSongBySongName(args.songName)
     }
 
     private fun setupMenu() {

@@ -1,20 +1,19 @@
 package com.example.songbook.ui.favorite
 
 import androidx.lifecycle.*
-import com.example.songbook.data.AppDao
 import com.example.songbook.data.Song
+import com.example.songbook.data.SongDao
 import com.example.songbook.data.relations.BandWithSongs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class FavoriteSongsViewModel @Inject constructor(
-    private val appDao: AppDao
+    private val songDao: SongDao
 ) : ViewModel() {
 
     private val _bandWithSongs = MutableLiveData<BandWithSongs>()
@@ -39,7 +38,7 @@ class FavoriteSongsViewModel @Inject constructor(
     }
 
     fun addToFavorite(song: Song, isFavorite: Boolean) = viewModelScope.launch {
-        appDao.update(song.copy(isFavorite = isFavorite))
+        songDao.update(song.copy(isFavorite = isFavorite))
     }
 
     sealed class SongsEvent {

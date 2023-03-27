@@ -18,10 +18,10 @@ import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class FavoriteFragment : Fragment(), FavoriteListAdapter.OnItemClickListener {
+class FavoriteBandsFragment : Fragment(), FavoriteListAdapter.OnItemClickListener {
 
     private var _binding: FragmentFavoriteBinding? = null
-    private val viewModel: FavoriteViewModel by viewModels()
+    private val viewModel: FavoriteBandsViewModel by viewModels()
     private lateinit var searchView: SearchView
 
     // This property is only valid between onCreateView and
@@ -54,8 +54,8 @@ class FavoriteFragment : Fragment(), FavoriteListAdapter.OnItemClickListener {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.favBandsEvent.collect() { event ->
                 when (event) {
-                    is FavoriteViewModel.FavEvent.NavigateToFavSongsScreen -> {
-                       val action = FavoriteFragmentDirections
+                    is FavoriteBandsViewModel.FavEvent.NavigateToFavSongsScreen -> {
+                       val action = FavoriteBandsFragmentDirections
                            .actionNavigationFavoriteToFavoriteSongsFragment(event.bandWithSongs,
                                event.bandWithSongs.band.bandName)
                         findNavController().navigate(action)

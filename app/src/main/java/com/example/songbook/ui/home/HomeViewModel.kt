@@ -1,8 +1,7 @@
 package com.example.songbook.ui.home
 
 import androidx.lifecycle.*
-import com.example.songbook.data.AppDao
-import com.example.songbook.data.Band
+import com.example.songbook.data.BandDao
 import com.example.songbook.data.relations.BandWithSongs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -13,12 +12,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val appDao: AppDao
+    private val bandDao: BandDao
 ) : ViewModel() {
 
     val searchQuery = MutableStateFlow("")
 
-    private val bandsFlow = searchQuery.flatMapLatest { appDao.getBandWithSongs(it) }
+    private val bandsFlow = searchQuery.flatMapLatest { bandDao.getBandWithSongs(it) }
     val bands = bandsFlow.asLiveData()
 
     private val bandsEventChannel = Channel<BandsEvent>()

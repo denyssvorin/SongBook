@@ -1,8 +1,8 @@
 package com.example.songbook.ui.singleSong
 
 import androidx.lifecycle.*
-import com.example.songbook.data.AppDao
 import com.example.songbook.data.Song
+import com.example.songbook.data.SongDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -10,7 +10,7 @@ import kotlin.properties.Delegates
 
 @HiltViewModel
 class SingleSongViewModel @Inject constructor(
-    private val appDao: AppDao
+    private val songDao: SongDao
 ) : ViewModel() {
 
     val resultSuccessFavorite = MutableLiveData<Boolean>()
@@ -38,14 +38,14 @@ class SingleSongViewModel @Inject constructor(
         get() = _textSong
 
     fun getSongBySongName(song: String) = viewModelScope.launch {
-        val flow = appDao.getTextSong(song)
+        val flow = songDao.getSongText(song)
         flow.collect { text ->
             _textSong.value = text
         }
     }
 
     fun addToFavoriteSong(song: Song, isFavorite: Boolean) = viewModelScope.launch {
-        appDao.update(song.copy(isFavorite = isFavorite))
+        songDao.update(song.copy(isFavorite = isFavorite))
     }
 
     interface OnAddToFavoriteClickListener {

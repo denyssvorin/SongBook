@@ -3,9 +3,8 @@ package com.example.songbook.ui.favorite
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.songbook.data.AppDao
+import com.example.songbook.data.BandDao
 import com.example.songbook.data.relations.BandWithSongs
-import com.example.songbook.ui.home.HomeViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,14 +15,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FavoriteViewModel @Inject constructor(
-    private val appDao: AppDao
+class FavoriteBandsViewModel @Inject constructor(
+    private val bandDao: BandDao
 ) : ViewModel() {
 
     val searchQuery = MutableStateFlow("")
 
     private val favBandsFlow = searchQuery.flatMapLatest {
-        appDao.getBandWithSongs(it).map { mainList ->
+        bandDao.getBandWithSongs(it).map { mainList ->
             mainList.filter { bandWithSongs ->
                 bandWithSongs.songs.map { song -> song.isFavorite }.contains(true)
             }.map { favBand ->

@@ -29,7 +29,9 @@ object AppModule {
             .build()
 
     @Provides
-    fun provideBandDao(db: AppDatabase) = db.appDao()
+    fun provideBandDao(db: AppDatabase) = db.bandDao()
+    @Provides
+    fun provideSongDao(db: AppDatabase) = db.songDao()
 
     @ApplicationScope
     @Provides

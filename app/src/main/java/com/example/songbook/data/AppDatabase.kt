@@ -12,7 +12,8 @@ import javax.inject.Provider
 @Database(entities = [Band::class, Song::class], version = 1)
 abstract class AppDatabase: RoomDatabase() {
 
-    abstract fun appDao(): AppDao
+    abstract fun bandDao(): BandDao
+    abstract fun songDao(): SongDao
 
     class Callback @Inject constructor(
         private val database: Provider<AppDatabase>,
@@ -21,7 +22,8 @@ abstract class AppDatabase: RoomDatabase() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
 
-            val appDao = database.get().appDao()
+            val bandDao = database.get().bandDao()
+            val songDao = database.get().songDao()
 
             val bands: List<Band> = listOf(
                 Band("Band1"),
@@ -34,11 +36,11 @@ abstract class AppDatabase: RoomDatabase() {
             )
 
             applicationScope.launch {
-                bands.forEach { appDao.insertBand(it) }
+                bands.forEach { bandDao.insertBand(it) }
             }
 
             applicationScope.launch {
-                appDao.insertSong(Song(
+                songDao.insertSong(Song(
                     "some text1",
                     "Band1",
                     textSong = "Lorem ipsum dolor sit amet, " +
@@ -47,9 +49,9 @@ abstract class AppDatabase: RoomDatabase() {
                         "consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat " +
                         "nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt " +
                         "mollit anim id est laborum"))
-                appDao.insertSong(Song("some group11","Band1"))
-                appDao.insertSong(Song("some Song111", "Band2"))
-                appDao.insertSong(Song(
+                songDao.insertSong(Song("some group11","Band1"))
+                songDao.insertSong(Song("some Song111", "Band2"))
+                songDao.insertSong(Song(
                     "some Song with text",
                     "Band2",
                 textSong = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. " +
@@ -59,11 +61,11 @@ abstract class AppDatabase: RoomDatabase() {
                         "remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset " +
                         "sheets containing Lorem Ipsum passages, and more recently with desktop publishing software " +
                         "like Aldus PageMaker including versions of Lorem Ipsum."))
-                appDao.insertSong(Song("main song", "Band2"))
-                appDao.insertSong(Song("something that fav", "Band2", true))
-                appDao.insertSong(Song("Song", "Band3"))
-                appDao.insertSong(Song("Song1", "Band4", true))
-                appDao.insertSong(Song("Song2", "Band5", true))
+                songDao.insertSong(Song("main song", "Band2"))
+                songDao.insertSong(Song("something that fav", "Band2", true))
+                songDao.insertSong(Song("Song", "Band3"))
+                songDao.insertSong(Song("Song1", "Band4", true))
+                songDao.insertSong(Song("Song2", "Band5", true))
             }
         }
     }

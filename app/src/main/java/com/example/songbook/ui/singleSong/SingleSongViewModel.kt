@@ -4,13 +4,9 @@ import androidx.lifecycle.*
 import com.example.songbook.data.AppDao
 import com.example.songbook.data.Song
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
+import kotlin.properties.Delegates
 
 @HiltViewModel
 class SingleSongViewModel @Inject constructor(
@@ -20,16 +16,16 @@ class SingleSongViewModel @Inject constructor(
     val resultSuccessFavorite = MutableLiveData<Boolean>()
     val resultDeleteFavorite = MutableLiveData<Boolean>()
 
-    private var isFavorite = false
+    var isFavorite by Delegates.notNull<Boolean>()
 
     fun setFavorite(song: Song) {
         viewModelScope.launch {
             song.let {
                 if (isFavorite) {
-                    appDao.delete(song)
+                    addToFavoriteSong(song, false)
                     resultDeleteFavorite.value = true
                 } else {
-                    appDao.insertSong(song)
+                    addToFavoriteSong(song, true)
                     resultSuccessFavorite.value = true
                 }
             }
@@ -46,5 +42,13 @@ class SingleSongViewModel @Inject constructor(
         flow.collect { text ->
             _textSong.value = text
         }
+    }
+
+    fun addToFavoriteSong(song: Song, isFavorite: Boolean) = viewModelScope.launch {
+        appDao.update(song.copy(isFavorite = isFavorite))
+    }
+
+    interface OnAddToFavoriteClickListener {
+        fun addToFavorite(song: Song, isFavorite: Boolean)
     }
 }

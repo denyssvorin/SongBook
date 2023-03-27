@@ -25,7 +25,7 @@ class SongsViewModel @Inject constructor(
     private val songsFlow = searchQuery.flatMapLatest {
         appDao.getSongs(it)
     }
-    val songs = songsFlow.asLiveData()
+    //val songs = songsFlow.asLiveData()
 
     private val songsEventChannel = Channel<SongsEvent>()
     val songsEvent = songsEventChannel.receiveAsFlow()

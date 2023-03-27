@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:lines="1"
         android:padding="12dp"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:layout_toStartOf="@id/icon_add_to_favorite"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

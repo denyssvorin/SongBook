@@ -2,7 +2,6 @@ package com.example.songbook.ui.singleSong
 
 import android.os.Bundle
 import android.view.*
-import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -61,9 +60,12 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
 
                 viewModel.resultSuccessFavorite.observe(viewLifecycleOwner) {
                     addToFavoriteIcon.setIcon(R.drawable.ic_favorite_checked)
+                    showAddCustomToast()
+
                 }
                 viewModel.resultDeleteFavorite.observe(viewLifecycleOwner) {
                     addToFavoriteIcon.setIcon(R.drawable.ic_favorite_border)
+                    showRemoveCustomToast()
                 }
             }
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -74,7 +76,7 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 when(menuItem.itemId) {
                     R.id.action_add_to_favorite -> {
-                        Toast.makeText(requireContext(),"Added", Toast.LENGTH_SHORT).show()
+                        //Toast.makeText(requireContext(),"Added", Toast.LENGTH_SHORT).show()
                         viewModel.setFavorite(args.song)
 
                         return true
@@ -84,6 +86,22 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
             }
 
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    private fun showAddCustomToast() {
+        val toast = Toast.makeText(requireContext(), "", Toast.LENGTH_SHORT)
+        val root: ViewGroup? = null
+        val toastLayout = layoutInflater.inflate(R.layout.custom_toast_add_layout, root)
+        toast.view = toastLayout
+        toast.show()
+    }
+
+    private fun showRemoveCustomToast() {
+        val toast = Toast.makeText(requireContext(), "", Toast.LENGTH_SHORT)
+        val root: ViewGroup? = null
+        val toastLayout = layoutInflater.inflate(R.layout.custom_toast_remove_layout, root)
+        toast.view = toastLayout
+        toast.show()
     }
 
     override fun addToFavorite(song: Song, isFavorite: Boolean) {

@@ -12,10 +12,10 @@
         android:layout_height="wrap_content"
         android:lines="1"
         android:padding="10dp"
-        android:text="@string/band"
-        android:textSize="20sp"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@string/band" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

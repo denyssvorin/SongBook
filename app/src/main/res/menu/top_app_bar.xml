@@ -3,25 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_search"
+        android:contentDescription="@string/search"
         android:icon="@drawable/ic_search_24"
         android:title="@string/search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        android:contentDescription="@string/search"
         app:showAsAction="always|collapseActionView" />
 
     <item
         android:id="@+id/action_add_to_favorite"
+        android:checkable="true"
+        android:contentDescription="@string/title_favorite"
         android:icon="@drawable/ic_favorite_border"
         android:title="@string/title_favorite"
-        android:contentDescription="@string/title_favorite"
-        app:showAsAction="ifRoom"
-        android:checkable="true"/>
-
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_more"
-        android:title="@string/more"
         android:contentDescription="@string/more"
+        android:title="@string/more"
         app:showAsAction="never" />
 
 </menu>

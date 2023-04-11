@@ -11,6 +11,9 @@
     <string name="band">Band</string>
     <string name="song">Song</string>
     <string name="add_to_favorite">Add to favorite</string>
-
+    <string name="language">Language</string>
+    <string name="theme">Theme</string>
+    <string name="font_size">Font size</string>
+    <string name="about">About</string>
 
 </resources>

@@ -25,8 +25,8 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginEnd="0dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:button="@drawable/selector_favorite"
+        app:buttonTint="#CE5959"
         android:contentDescription="@string/add_to_favorite" />
 
 

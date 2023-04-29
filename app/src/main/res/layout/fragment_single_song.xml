@@ -5,6 +5,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.singleSong.SingleSongFragment">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        android:fillViewport="true">
+
     <TextView
         android:id="@+id/text_view_text_song"
         android:layout_width="match_parent"
@@ -12,6 +18,8 @@
         android:layout_margin="10dp"
         android:paddingTop="5dp"
         android:textSize="16sp"
+        android:paddingBottom="8dp"
         tools:text="@string/hello_blank_fragment" />
+    </ScrollView>
 
 </FrameLayout>

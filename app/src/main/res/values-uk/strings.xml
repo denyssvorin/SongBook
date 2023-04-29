@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Guitar SongBook</string>
+    <string name="title_home">Головна</string>
+    <string name="title_favorite">Улюблені</string>
+    <string name="title_settings">Налаштування</string>
+    <string name="page_title">Заголовок</string>
+    <string name="search">Пошук</string>
+    <string name="more">Більше</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="band">Група</string>
+    <string name="song">Пісня</string>
+    <string name="add_to_favorite">Додати до улюблених</string>
+    <string name="language">Мова</string>
+    <string name="theme">Тема</string>
+    <string name="font_size">Розмір шрифту</string>
+    <string name="about">Про застосунок</string>
+    <string name="cancel">Відмінити</string>
+    <string name="confirm">Підтвердити</string>
+    <string name="message">Повідомлення</string>
+
+    <string name="english">Англійська</string>
+    <string name="ukrainian">Українська</string>
+    <string name="choose_language">Виберіть мову</string>
+    <string name="choose_theme">Виберіть тему</string>
+    <string name="light">Світла</string>
+    <string name="dark">Темна</string>
+    <string name="ok">ОК</string>
+    <string name="use_system_theme">Використовувати тему системи</string>
+    <string name="change_text_size">Змінити розмір шрифту</string>
+    <string name="very_small">Дуже малий</string>
+    <string name="small">Малий</string>
+    <string name="medium">Середній</string>
+    <string name="large">Великий</string>
+</resources>

@@ -71,6 +71,8 @@ class HomeFragment : Fragment(), UserHomeBandsListAdapter.OnItemClickListener {
                 super.onPrepareMenu(menu)
                 val favoriteIcon = menu.findItem(R.id.action_add_to_favorite)
                 favoriteIcon.isVisible = false
+                val fontSizeIcon = menu.findItem(R.id.action_change_text_size)
+                fontSizeIcon.isVisible = false
             }
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_app_bar, menu)

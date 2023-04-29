@@ -1,8 +1,10 @@
 package com.example.songbook.ui.singleSong
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.*
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -15,7 +17,7 @@ import com.example.songbook.databinding.FragmentSingleSongBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickListener {
+class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickListener, BottomSheetChangeTextSize.BottomSheetListener {
 
     private val args : SingleSongFragmentArgs by navArgs()
     private val viewModel : SingleSongViewModel by viewModels()
@@ -42,6 +44,7 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
         viewModel.getSongBySongName(args.songName)
         viewModel.isFavorite = args.song.isFavorite
 
+        setupFromSharPref()
     }
 
     private fun setupMenu() {
@@ -76,8 +79,13 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 when(menuItem.itemId) {
                     R.id.action_add_to_favorite -> {
-                        //Toast.makeText(requireContext(),"Added", Toast.LENGTH_SHORT).show()
                         viewModel.setFavorite(args.song)
+
+                        return true
+                    }
+                    R.id.action_change_text_size -> {
+                        val bottomSheet = BottomSheetChangeTextSize(this@SingleSongFragment)
+                        bottomSheet.show(parentFragmentManager, "exampleBottomSheet")
 
                         return true
                     }
@@ -86,6 +94,15 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
             }
 
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    private fun setupFromSharPref() {
+        val sharedPref = activity?.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
+        val editor = sharedPref?.edit()
+
+        val savedTextSize = sharedPref?.getInt("single_song_text_size", 16) ?: 16
+
+        binding.textViewTextSong.textSize = savedTextSize.toFloat()
     }
 
     private fun showAddCustomToast() {
@@ -106,6 +123,14 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
 
     override fun addToFavorite(song: Song, isFavorite: Boolean) {
         viewModel.addToFavoriteSong(song, isFavorite)
+    }
+
+    override fun increaseText(value: Float) {
+        binding.textViewTextSong.setTextSize(TypedValue.COMPLEX_UNIT_SP, value)
+    }
+
+    override fun decreaseText(value: Float) {
+        binding.textViewTextSong.setTextSize(TypedValue.COMPLEX_UNIT_SP, value)
     }
 
 

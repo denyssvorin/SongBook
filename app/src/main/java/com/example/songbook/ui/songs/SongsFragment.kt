@@ -68,7 +68,6 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
         }
 
         viewModel.onBandLoaded(args.bandWithSongs)
-
     }
 
     private fun setupMenu() {
@@ -80,6 +79,8 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
                 favoriteIcon.isVisible = false
                 val searchIcon = menu.findItem(R.id.action_search)
                 searchIcon.isVisible = false
+                val fontSizeIcon = menu.findItem(R.id.action_change_text_size)
+                fontSizeIcon.isVisible = false
             }
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_app_bar, menu)
@@ -99,6 +100,9 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                when(menuItem.itemId) {
+                    R.id.action_add_to_favorite -> ""
+                }
                 return false
             }
 

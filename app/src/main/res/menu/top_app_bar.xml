@@ -18,6 +18,13 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/action_change_text_size"
+        android:contentDescription="@string/font_size"
+        android:icon="@drawable/ic_font_size"
+        android:title="@string/font_size"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_more"
         android:contentDescription="@string/more"
         android:title="@string/more"

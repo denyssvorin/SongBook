@@ -84,6 +84,8 @@ class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListen
                 favoriteIcon.isVisible = false
                 val searchIcon = menu.findItem(R.id.action_search)
                 searchIcon.isVisible = false
+                val fontSizeIcon = menu.findItem(R.id.action_change_text_size)
+                fontSizeIcon.isVisible = false
             }
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_app_bar, menu)

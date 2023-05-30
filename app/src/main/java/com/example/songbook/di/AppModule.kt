@@ -28,8 +28,8 @@ object AppModule {
             .addCallback(callback)
             .build()
 
-    @Provides
-    fun provideBandDao(db: AppDatabase) = db.bandDao()
+//    @Provides
+//    fun provideBandDao(db: AppDatabase) = db.bandDao()
     @Provides
     fun provideSongDao(db: AppDatabase) = db.songDao()
 

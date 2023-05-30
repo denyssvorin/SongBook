@@ -1,4 +1,4 @@
-package com.example.songbook.ui.favorite
+package com.example.songbook.ui.favorite.favoriteSongs
 
 import android.os.Bundle
 import android.view.*
@@ -15,11 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.songbook.R
 import com.example.songbook.data.Song
 import com.example.songbook.databinding.FragmentFavoriteSongsBinding
-import com.example.songbook.databinding.FragmentSongsBinding
-import com.example.songbook.ui.songs.SongsFragmentArgs
-import com.example.songbook.ui.songs.SongsFragmentDirections
-import com.example.songbook.ui.songs.SongsViewModel
-import com.example.songbook.ui.songs.UserSongsListAdapter
+import com.example.songbook.ui.home.songs.UserSongsListAdapter
 import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -48,15 +44,13 @@ class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListen
 
         val songAdapter = UserSongsListAdapter(this)
 
-        val receivedList = args.bandWithSongs.songs
-
         binding.recycleViewFavoriteSongs.apply {
             layoutManager = LinearLayoutManager(activity)
             adapter = songAdapter
         }
 
-        viewModel.bandWithSongs.observe(viewLifecycleOwner) {
-            songAdapter.submitList(receivedList)
+        viewModel.songs.observe(viewLifecycleOwner) { songList ->
+            songAdapter.submitList(songList)
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -71,7 +65,7 @@ class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListen
             }
         }
 
-        viewModel.onBandLoaded(args.bandWithSongs)
+        viewModel.onBandLoaded(args.bandName)
 
     }
 

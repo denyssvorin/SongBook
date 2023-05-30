@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SongDao {
 
+    @Query("SELECT * FROM song_table WHERE bandName LIKE '%' || :searchQuery || '%'")
+    fun getSongs(searchQuery: String): Flow<List<Song>>
+
     @Query("SELECT textSong FROM song_table WHERE songName LIKE '%' || :searchQuery || '%'")
     fun getSongText(searchQuery: String): Flow<String>
 

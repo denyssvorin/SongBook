@@ -9,8 +9,8 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Song (
-    @PrimaryKey(autoGenerate = false) val songName: String,
     val bandName: String,
+    @PrimaryKey(autoGenerate = false) val songName: String,
     val isFavorite: Boolean = false,
     val textSong: String = "TEXT OF SONG"
     ): Parcelable

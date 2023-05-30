@@ -1,36 +1,39 @@
-package com.example.songbook.ui.favorite
+package com.example.songbook.ui.home.songs
 
 import androidx.lifecycle.*
 import com.example.songbook.data.Song
 import com.example.songbook.data.SongDao
-import com.example.songbook.data.relations.BandWithSongs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FavoriteSongsViewModel @Inject constructor(
+class SongsViewModel @Inject constructor(
     private val songDao: SongDao
 ) : ViewModel() {
 
-    private val _bandWithSongs = MutableLiveData<BandWithSongs>()
-    val bandWithSongs: LiveData<BandWithSongs>
-        get() = _bandWithSongs
+    private var receivedBandName: String? = "band"
 
     val searchQuery = MutableStateFlow("")
-//    private val songsFlow = searchQuery.flatMapLatest {
-//        appDao.getFavoriteSongs(it)
-//    }
-//    val songs = songsFlow.asLiveData()
+
+    //flow that receives songs by receivedBandName
+    private val songsFlow = searchQuery.flatMapLatest {
+        receivedBandName?.let { band ->
+            songDao.getSongs(band)
+        }!!
+    }
+    val songs = songsFlow.asLiveData()
 
     private val songsEventChannel = Channel<SongsEvent>()
     val songsEvent = songsEventChannel.receiveAsFlow()
 
-    fun onBandLoaded(bandWithSongs: BandWithSongs) {
-        _bandWithSongs.postValue(bandWithSongs)
+
+    fun onBandLoaded(band: String) {
+        receivedBandName = band
     }
 
     fun onSongSelected(song: Song) = viewModelScope.launch {

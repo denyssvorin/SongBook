@@ -32,12 +32,9 @@
         tools:layout="@layout/fragment_settings" />
     <fragment
         android:id="@+id/songsFragment"
-        android:name="com.example.songbook.ui.songs.SongsFragment"
+        android:name="com.example.songbook.ui.home.songs.SongsFragment"
         android:label="{bandName}"
         tools:layout="@layout/fragment_songs" >
-        <argument
-            android:name="bandWithSongs"
-            app:argType="com.example.songbook.data.relations.BandWithSongs" />
         <argument
             android:name="bandName"
             app:argType="string"/>
@@ -59,12 +56,9 @@
     </fragment>
     <fragment
         android:id="@+id/favoriteSongsFragment"
-        android:name="com.example.songbook.ui.favorite.FavoriteSongsFragment"
+        android:name="com.example.songbook.ui.favorite.favoriteSongs.FavoriteSongsFragment"
         android:label="{bandName}"
         tools:layout="@layout/fragment_favorite_songs" >
-        <argument
-            android:name="bandWithSongs"
-            app:argType="com.example.songbook.data.relations.BandWithSongs" />
         <argument
             android:name="bandName"
             app:argType="string"/>

@@ -1,13 +1,11 @@
-package com.example.songbook.ui.songs
+package com.example.songbook.ui.home.songs
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.songbook.R
 import com.example.songbook.data.Song
-import com.example.songbook.data.relations.BandWithSongs
 import com.example.songbook.databinding.SongItemBinding
 
 class UserSongsListAdapter(private val listener: OnItemClickListener)

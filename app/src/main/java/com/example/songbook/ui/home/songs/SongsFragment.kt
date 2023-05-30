@@ -1,8 +1,8 @@
-package com.example.songbook.ui.songs
+package com.example.songbook.ui.home.songs
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -52,8 +52,8 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
             adapter = songAdapter
         }
 
-        viewModel.bandWithSongs.observe(viewLifecycleOwner) {
-            songAdapter.submitList(it.songs)
+        viewModel.songs.observe(viewLifecycleOwner) { songList ->
+            songAdapter.submitList(songList)
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -67,7 +67,7 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
             }
         }
 
-        viewModel.onBandLoaded(args.bandWithSongs)
+        viewModel.onBandLoaded(args.bandName)
     }
 
     private fun setupMenu() {

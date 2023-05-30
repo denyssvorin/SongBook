@@ -12,7 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.songbook.R
-import com.example.songbook.data.relations.BandWithSongs
+import com.example.songbook.data.Song
 import com.example.songbook.databinding.FragmentFavoriteBinding
 import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,8 +56,7 @@ class FavoriteBandsFragment : Fragment(), FavoriteListAdapter.OnItemClickListene
                 when (event) {
                     is FavoriteBandsViewModel.FavEvent.NavigateToFavSongsScreen -> {
                        val action = FavoriteBandsFragmentDirections
-                           .actionNavigationFavoriteToFavoriteSongsFragment(event.bandWithSongs,
-                               event.bandWithSongs.band.bandName)
+                           .actionNavigationFavoriteToFavoriteSongsFragment(event.favBand)
                         findNavController().navigate(action)
                     }
                 }
@@ -98,7 +97,7 @@ class FavoriteBandsFragment : Fragment(), FavoriteListAdapter.OnItemClickListene
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    override fun onItemClick(bandWithSongs: BandWithSongs) {
+    override fun onItemClick(bandWithSongs: String) {
         viewModel.onBandSelected(bandWithSongs)
     }
 

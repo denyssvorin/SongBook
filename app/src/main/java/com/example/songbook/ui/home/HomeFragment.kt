@@ -11,9 +11,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.songbook.data.Band
 import com.example.songbook.R
-import com.example.songbook.data.relations.BandWithSongs
+import com.example.songbook.data.Song
 import com.example.songbook.databinding.FragmentHomeBinding
 import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
@@ -55,8 +54,7 @@ class HomeFragment : Fragment(), UserHomeBandsListAdapter.OnItemClickListener {
             viewModel.bandsEvent.collect() { event ->
                 when (event) {
                     is HomeViewModel.BandsEvent.NavigateToSongsListScreen -> {
-                        val action = HomeFragmentDirections.actionNavigationHomeToSongsFragment(event.bandWithSongs,
-                            event.bandWithSongs.band.bandName)
+                        val action = HomeFragmentDirections.actionNavigationHomeToSongsFragment(event.band)
                         findNavController().navigate(action)
                     }
                 }
@@ -104,7 +102,7 @@ class HomeFragment : Fragment(), UserHomeBandsListAdapter.OnItemClickListener {
         searchView.setOnQueryTextListener(null)
     }
 
-    override fun onItemClick(bandWithSongs: BandWithSongs) {
+    override fun onItemClick(bandWithSongs: String) {
         viewModel.onBandSelected(bandWithSongs)
     }
 }

@@ -3,8 +3,7 @@ package com.example.songbook.ui.favorite
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.songbook.data.BandDao
-import com.example.songbook.data.relations.BandWithSongs
+import com.example.songbook.data.SongDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,30 +15,33 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FavoriteBandsViewModel @Inject constructor(
-    private val bandDao: BandDao
+    private val songDao: SongDao
 ) : ViewModel() {
 
     val searchQuery = MutableStateFlow("")
 
-    private val favBandsFlow = searchQuery.flatMapLatest {
-        bandDao.getBandWithSongs(it).map { mainList ->
-            mainList.filter { bandWithSongs ->
-                bandWithSongs.songs.map { song -> song.isFavorite }.contains(true)
-            }.map { favBand ->
-                favBand.copy(songs = favBand.songs.filter { it.isFavorite })
-            }
+    private val favSongsFlow = searchQuery.flatMapLatest { query ->
+        songDao.getSongs(query).map { favSongList ->
+            favSongList.filter {
+                it.isFavorite
+            }.map {
+                it.bandName
+            }.toSet().toList()
         }
     }
-    val favBands = favBandsFlow.asLiveData()
+
+    val favBands = favSongsFlow.map {
+        return@map it
+    }.asLiveData()
 
     private val favBandsEventChannel = Channel<FavEvent>()
     val favBandsEvent = favBandsEventChannel.receiveAsFlow()
 
-    fun onBandSelected(bandWithSongs: BandWithSongs) = viewModelScope.launch {
-        favBandsEventChannel.send(FavEvent.NavigateToFavSongsScreen(bandWithSongs))
+    fun onBandSelected(favBand: String) = viewModelScope.launch {
+        favBandsEventChannel.send(FavEvent.NavigateToFavSongsScreen(favBand))
     }
 
     sealed class FavEvent() {
-        data class NavigateToFavSongsScreen(val bandWithSongs: BandWithSongs) : FavEvent()
+        data class NavigateToFavSongsScreen(val favBand: String) : FavEvent()
     }
 }

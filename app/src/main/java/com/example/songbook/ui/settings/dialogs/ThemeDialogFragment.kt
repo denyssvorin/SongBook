@@ -34,13 +34,10 @@ class ThemeDialogFragment : DialogFragment() {
 
         var selectedItemIndex = sharedPref?.getInt("theme_radio_button", 0) ?: 0
 
-        var selectedTheme = themeList[selectedItemIndex]
-
         return MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.theme))
             .setSingleChoiceItems(themeList, selectedItemIndex) { _, which ->
                 selectedItemIndex = which
-                selectedTheme = themeList[which]
 
                 editor?.apply {
                     putInt("theme_radio_button", selectedItemIndex)

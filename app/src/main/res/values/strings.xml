@@ -32,4 +32,6 @@
     <string name="small">Small</string>
     <string name="medium">Medium</string>
     <string name="large">Large</string>
+    <string name="exit">Exit</string>
+    <string name="exit_confirmation">Are you sure want to close the application?</string>
 </resources>

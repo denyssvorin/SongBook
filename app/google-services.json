@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "983104111270",
+    "firebase_url": "https://songbook-30cd5-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "songbook-30cd5",
+    "storage_bucket": "songbook-30cd5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983104111270:android:65a360d71f9ccad3b2aa67",
+        "android_client_info": {
+          "package_name": "com.example.songbook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcz1Eb_ud_O1oifzFtxc2srd77gIFADLA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

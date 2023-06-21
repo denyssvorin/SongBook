@@ -1,4 +1,4 @@
-package com.example.songbook.ui.singleSong
+package com.example.songbook.ui.singlesong
 
 import androidx.lifecycle.*
 import com.example.songbook.data.Song
@@ -13,35 +13,28 @@ class SingleSongViewModel @Inject constructor(
     private val songDao: SongDao
 ) : ViewModel() {
 
-    val resultSuccessFavorite = MutableLiveData<Boolean>()
-    val resultDeleteFavorite = MutableLiveData<Boolean>()
+    val resultSuccessFavorite = SingleLiveEvent<Boolean>()
 
     var isFavorite by Delegates.notNull<Boolean>()
+    var isScrollIcon by Delegates.notNull<Boolean>()
 
     fun setFavorite(song: Song) {
         viewModelScope.launch {
             song.let {
                 if (isFavorite) {
                     addToFavoriteSong(song, false)
-                    resultDeleteFavorite.value = true
+                    resultSuccessFavorite.setValue(false)
                 } else {
                     addToFavoriteSong(song, true)
-                    resultSuccessFavorite.value = true
+                    resultSuccessFavorite.setValue(true)
                 }
+                isFavorite = !isFavorite
             }
-            isFavorite = !isFavorite
         }
     }
 
-    private val _textSong = MutableLiveData<String>()
-    val textSong: LiveData<String>
-        get() = _textSong
-
-    fun getSongBySongName(song: String) = viewModelScope.launch {
-        val flow = songDao.getSongText(song)
-        flow.collect { text ->
-            _textSong.value = text
-        }
+    fun setPlayIcon() {
+        isScrollIcon = !isScrollIcon
     }
 
     fun addToFavoriteSong(song: Song, isFavorite: Boolean) = viewModelScope.launch {

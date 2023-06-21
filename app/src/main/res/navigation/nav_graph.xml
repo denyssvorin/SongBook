@@ -9,20 +9,28 @@
         android:id="@+id/navigation_home"
         android:name="com.example.songbook.ui.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" >
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_navigation_home_to_songsFragment"
-            app:destination="@id/songsFragment" />
+            app:destination="@id/songsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_favorite"
         android:name="com.example.songbook.ui.favorite.FavoriteBandsFragment"
         android:label="@string/title_favorite"
-        tools:layout="@layout/fragment_favorite" >
+        tools:layout="@layout/fragment_favorite">
         <action
             android:id="@+id/action_navigation_favorite_to_favoriteSongsFragment"
-            app:destination="@id/favoriteSongsFragment" />
+            app:destination="@id/favoriteSongsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
     <fragment
@@ -34,37 +42,45 @@
         android:id="@+id/songsFragment"
         android:name="com.example.songbook.ui.home.songs.SongsFragment"
         android:label="{bandName}"
-        tools:layout="@layout/fragment_songs" >
+        tools:layout="@layout/fragment_songs">
         <argument
             android:name="bandName"
-            app:argType="string"/>
+            app:argType="string" />
         <action
             android:id="@+id/action_songsFragment_to_singleSongFragment"
-            app:destination="@id/singleSongFragment" />
+            app:destination="@id/singleSongFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/singleSongFragment"
-        android:name="com.example.songbook.ui.singleSong.SingleSongFragment"
+        android:name="com.example.songbook.ui.singlesong.SingleSongFragment"
         android:label="{songName}"
-        tools:layout="@layout/fragment_single_song" >
+        tools:layout="@layout/fragment_single_song">
         <argument
             android:name="song"
-            app:argType="com.example.songbook.data.Song"/>
+            app:argType="com.example.songbook.data.Song" />
         <argument
             android:name="songName"
-            app:argType="string"/>
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/favoriteSongsFragment"
         android:name="com.example.songbook.ui.favorite.favoriteSongs.FavoriteSongsFragment"
         android:label="{bandName}"
-        tools:layout="@layout/fragment_favorite_songs" >
+        tools:layout="@layout/fragment_favorite_songs">
         <argument
             android:name="bandName"
-            app:argType="string"/>
+            app:argType="string" />
         <action
             android:id="@+id/action_favoriteSongsFragment_to_singleSongFragment"
-            app:destination="@id/singleSongFragment" />
+            app:destination="@id/singleSongFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
 </navigation>

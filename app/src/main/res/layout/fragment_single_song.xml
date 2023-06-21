@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.singleSong.SingleSongFragment">
+    android:orientation="vertical"
+    tools:context=".ui.singlesong.SingleSongFragment"
+    android:keepScreenOn="true"
+    android:id="@+id/linear_layout">
 
     <ScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
         android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/text_view_text_song"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:paddingTop="5dp"
-        android:textSize="16sp"
-        android:paddingBottom="8dp"
-        tools:text="@string/hello_blank_fragment" />
+        <TextView
+            android:id="@+id/text_view_text_song"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:paddingBottom="40dp"
+            android:textSize="16sp"
+            tools:text="@string/hello_blank_fragment" />
     </ScrollView>
 
-</FrameLayout>
+</LinearLayout>

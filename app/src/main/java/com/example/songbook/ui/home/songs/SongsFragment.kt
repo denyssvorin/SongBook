@@ -32,6 +32,8 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    val songAdapter = UserSongsListAdapter(this)
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -45,7 +47,6 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val songAdapter = UserSongsListAdapter(this)
 
         binding.recycleViewSongs.apply {
             layoutManager = LinearLayoutManager(activity)
@@ -55,6 +56,8 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
         viewModel.songs.observe(viewLifecycleOwner) { songList ->
             songAdapter.submitList(songList)
         }
+
+        viewModel.onBandLoaded(args.bandName)
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.songsEvent.collect() { event ->
@@ -66,8 +69,6 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
                  }
             }
         }
-
-        viewModel.onBandLoaded(args.bandName)
     }
 
     private fun setupMenu() {
@@ -75,12 +76,8 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
 
             override fun onPrepareMenu(menu: Menu) {
                 super.onPrepareMenu(menu)
-                val favoriteIcon = menu.findItem(R.id.action_add_to_favorite)
-                favoriteIcon.isVisible = false
                 val searchIcon = menu.findItem(R.id.action_search)
-                searchIcon.isVisible = false
-                val fontSizeIcon = menu.findItem(R.id.action_change_text_size)
-                fontSizeIcon.isVisible = false
+                searchIcon.isVisible = true
             }
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_app_bar, menu)

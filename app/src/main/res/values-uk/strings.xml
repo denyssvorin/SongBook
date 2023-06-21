@@ -32,4 +32,6 @@
     <string name="small">Малий</string>
     <string name="medium">Середній</string>
     <string name="large">Великий</string>
+    <string name="exit">Вийти</string>
+    <string name="exit_confirmation">Ви впевнені, що бажаєте закрити програму?</string>
 </resources>

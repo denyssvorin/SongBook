@@ -53,6 +53,8 @@ class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListen
             songAdapter.submitList(songList)
         }
 
+        viewModel.onBandLoaded(args.bandName)
+
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.songsEvent.collect() { event ->
                 when (event) {
@@ -64,9 +66,6 @@ class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListen
                 }
             }
         }
-
-        viewModel.onBandLoaded(args.bandName)
-
     }
 
     private fun setupMenu() {
@@ -74,12 +73,8 @@ class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListen
 
             override fun onPrepareMenu(menu: Menu) {
                 super.onPrepareMenu(menu)
-                val favoriteIcon = menu.findItem(R.id.action_add_to_favorite)
-                favoriteIcon.isVisible = false
                 val searchIcon = menu.findItem(R.id.action_search)
-                searchIcon.isVisible = false
-                val fontSizeIcon = menu.findItem(R.id.action_change_text_size)
-                fontSizeIcon.isVisible = false
+                searchIcon.isVisible = true
             }
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_app_bar, menu)

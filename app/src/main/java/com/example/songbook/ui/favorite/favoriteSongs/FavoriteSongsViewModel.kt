@@ -21,16 +21,15 @@ class FavoriteSongsViewModel @Inject constructor(
 
     val searchQuery = MutableStateFlow("")
 
-    //flow that receives songs by receivedBandName
-    private val songsFlow = searchQuery.flatMapLatest {
-        receivedBandName?.let { band ->
-            songDao.getSongs(band).map { favSongList ->
-                favSongList.filter { song ->
-                    song.isFavorite
-                }
-            }
-        }!!
+    // flow that receives songs by receivedBandName and search it via searchView
+    private val songsFlow = searchQuery.flatMapLatest { query ->
+        songDao.getSongByBand(query, receivedBandName!!).map { songList ->
+            songList.filter { song ->
+                song.isFavorite
+            }.toSet().toList()
+        }
     }
+
     val songs = songsFlow.asLiveData()
 
     private val songsEventChannel = Channel<SongsEvent>()

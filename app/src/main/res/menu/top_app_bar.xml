@@ -7,7 +7,8 @@
         android:icon="@drawable/ic_search_24"
         android:title="@string/search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="always|collapseActionView" />
+        app:showAsAction="always|collapseActionView"
+        android:visible="false"/>
 
     <item
         android:id="@+id/action_add_to_favorite"
@@ -15,19 +16,30 @@
         android:contentDescription="@string/title_favorite"
         android:icon="@drawable/ic_favorite_border"
         android:title="@string/title_favorite"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
 
     <item
         android:id="@+id/action_change_text_size"
         android:contentDescription="@string/font_size"
         android:icon="@drawable/ic_font_size"
         android:title="@string/font_size"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/action_play"
+        android:contentDescription="Play"
+        android:icon="@drawable/ic_play"
+        android:title="Play"
+        app:showAsAction="always"
+        android:visible="false"/>
 
     <item
         android:id="@+id/action_more"
         android:contentDescription="@string/more"
         android:title="@string/more"
-        app:showAsAction="never" />
+        app:showAsAction="never"
+        android:visible="false"/>
 
 </menu>

@@ -1,16 +1,12 @@
-package com.example.songbook.ui.singleSong
+package com.example.songbook.ui.singlesong
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
-import androidx.fragment.app.setFragmentResult
 import com.example.songbook.databinding.BottomSheetChangeTextSizeLayoutBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlin.properties.Delegates
 
 class BottomSheetChangeTextSize(val listener: BottomSheetListener) : BottomSheetDialogFragment() {
 

@@ -3,11 +3,9 @@ package com.example.songbook.ui.home
 import androidx.lifecycle.*
 import com.example.songbook.data.SongDao
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,7 +17,7 @@ class HomeViewModel @Inject constructor(
     val searchQuery = MutableStateFlow("")
 
     private val bandsFlow = searchQuery.flatMapLatest { query ->
-        songDao.getSongs(query).map { songList ->
+        songDao.getBands(query).map { songList ->
             songList.map {
                 it.bandName
             }.toSet().toList()

@@ -20,12 +20,10 @@ object AppModule {
     @Singleton
     fun provideDataBase(
        app: Application,
-       callback: AppDatabase.Callback
     ) = Room.databaseBuilder(app, AppDatabase::class.java, "songbook_database")
         // Room permanently deletes all data from the tables in your database
         // when it attempts to perform a migration with no defined migration path
             .fallbackToDestructiveMigration()
-            .addCallback(callback)
             .build()
 
 //    @Provides

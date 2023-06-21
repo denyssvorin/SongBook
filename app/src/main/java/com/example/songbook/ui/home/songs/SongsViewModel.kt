@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,12 +21,13 @@ class SongsViewModel @Inject constructor(
 
     val searchQuery = MutableStateFlow("")
 
-    //flow that receives songs by receivedBandName
-    private val songsFlow = searchQuery.flatMapLatest {
-        receivedBandName?.let { band ->
-            songDao.getSongs(band)
-        }!!
+    // flow that receives songs by receivedBandName and search it via searchView
+    private val songsFlow = searchQuery.flatMapLatest { query ->
+        songDao.getSongByBand(query, receivedBandName!!).map { songList ->
+            songList.toSet().toList()
+        }
     }
+
     val songs = songsFlow.asLiveData()
 
     private val songsEventChannel = Channel<SongsEvent>()

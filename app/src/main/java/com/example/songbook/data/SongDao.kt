@@ -9,6 +9,9 @@ interface SongDao {
     @Query("SELECT * FROM song_table WHERE bandName LIKE '%' || :searchQuery || '%' ORDER BY bandName")
     fun getBands(searchQuery: String): Flow<List<Song>>
 
+    @Query("SELECT * FROM song_table WHERE songName LIKE '%' || :searchQuery || '%' ORDER BY songName")
+    fun getSongs(searchQuery: String): Flow<List<Song>>
+
     @Query("SELECT * FROM song_table WHERE songName LIKE '%' || :searchQuery || '%' AND bandName LIKE '%' || :searchBandName || '%' ORDER BY songName")
     fun getSongByBand(searchQuery: String, searchBandName: String): Flow<List<Song>>
 

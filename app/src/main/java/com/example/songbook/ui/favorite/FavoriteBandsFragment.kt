@@ -12,13 +12,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.songbook.R
-import com.example.songbook.data.Song
 import com.example.songbook.databinding.FragmentFavoriteBinding
+import com.example.songbook.ui.contract.OnBandClickListener
+import com.example.songbook.ui.home.HomeBandsListAdapter
 import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class FavoriteBandsFragment : Fragment(), FavoriteListAdapter.OnItemClickListener {
+class FavoriteBandsFragment : Fragment(), OnBandClickListener {
 
     private var _binding: FragmentFavoriteBinding? = null
     private val viewModel: FavoriteBandsViewModel by viewModels()
@@ -41,8 +42,8 @@ class FavoriteBandsFragment : Fragment(), FavoriteListAdapter.OnItemClickListene
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val favBandsAdapter = FavoriteListAdapter(this)
-        binding.recycleViewFavBands.apply {
+        val favBandsAdapter = HomeBandsListAdapter(this)
+        binding.recyclerViewFavBand.apply {
             adapter = favBandsAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
@@ -95,7 +96,7 @@ class FavoriteBandsFragment : Fragment(), FavoriteListAdapter.OnItemClickListene
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    override fun onItemClick(bandWithSongs: String) {
+    override fun onBandClick(bandWithSongs: String) {
         viewModel.onBandSelected(bandWithSongs)
     }
 

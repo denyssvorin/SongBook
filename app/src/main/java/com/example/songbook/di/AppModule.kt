@@ -26,8 +26,6 @@ object AppModule {
             .fallbackToDestructiveMigration()
             .build()
 
-//    @Provides
-//    fun provideBandDao(db: AppDatabase) = db.bandDao()
     @Provides
     fun provideSongDao(db: AppDatabase) = db.songDao()
 

@@ -16,11 +16,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.songbook.*
 import com.example.songbook.data.Song
 import com.example.songbook.databinding.FragmentSongsBinding
+import com.example.songbook.ui.contract.OnSongClickListener
 import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
+class SongsFragment : Fragment(), OnSongClickListener {
 
     private var _binding: FragmentSongsBinding? = null
     private lateinit var searchView: SearchView
@@ -32,7 +33,7 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    val songAdapter = UserSongsListAdapter(this)
+    private val songAdapter = SongsListAdapter(this)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,8 +48,7 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-        binding.recycleViewSongs.apply {
+        binding.recyclerViewSong.apply {
             layoutManager = LinearLayoutManager(activity)
             adapter = songAdapter
         }
@@ -63,7 +63,8 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
             viewModel.songsEvent.collect() { event ->
                  when (event) {
                      is SongsViewModel.SongsEvent.NavigateToSingleSongScreen -> {
-                         val action = SongsFragmentDirections.actionSongsFragmentToSingleSongFragment(event.song, event.song.songName)
+                         val action = SongsFragmentDirections.actionSongsFragmentToSingleSongFragment(event.song,
+                             event.song.songName)
                          findNavController().navigate(action)
                      }
                  }
@@ -111,7 +112,7 @@ class SongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener {
         _binding = null
     }
 
-    override fun onItemClick(song: Song) {
+    override fun onSongClick(song: Song) {
         viewModel.onSongSelected(song)
     }
 

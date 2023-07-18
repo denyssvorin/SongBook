@@ -7,7 +7,7 @@
     tools:context=".ui.favorite.FavoriteBandsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycleViewFavBands"
+        android:id="@+id/recycler_view_fav_band"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/band_item"/>

@@ -15,12 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.songbook.R
 import com.example.songbook.data.Song
 import com.example.songbook.databinding.FragmentFavoriteSongsBinding
-import com.example.songbook.ui.home.songs.UserSongsListAdapter
+import com.example.songbook.ui.contract.OnSongClickListener
+import com.example.songbook.ui.home.songs.SongsListAdapter
 import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListener{
+class FavoriteSongsFragment : Fragment(), OnSongClickListener{
 
     private var _binding: FragmentFavoriteSongsBinding? = null
     private lateinit var searchView: SearchView
@@ -42,7 +43,7 @@ class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val songAdapter = UserSongsListAdapter(this)
+        val songAdapter = SongsListAdapter(this)
 
         binding.recycleViewFavoriteSongs.apply {
             layoutManager = LinearLayoutManager(activity)
@@ -99,7 +100,7 @@ class FavoriteSongsFragment : Fragment(), UserSongsListAdapter.OnItemClickListen
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    override fun onItemClick(song: Song) {
+    override fun onSongClick(song: Song) {
         viewModel.onSongSelected(song)
     }
 

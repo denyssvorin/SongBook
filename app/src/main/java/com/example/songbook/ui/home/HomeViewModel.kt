@@ -1,6 +1,8 @@
 package com.example.songbook.ui.home
 
+import android.util.Log
 import androidx.lifecycle.*
+import com.example.songbook.data.Song
 import com.example.songbook.data.SongDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -28,15 +30,33 @@ class HomeViewModel @Inject constructor(
         return@map it
     }.asLiveData()
 
+
+
+    private val songsFlow = searchQuery.flatMapLatest { query ->
+        songDao.getSongs(query).map { songList ->
+            songList.toSet().toList()
+        }
+    }
+
+    val songs = songsFlow.asLiveData()
+
+
+
     private val bandsEventChannel = Channel<BandsEvent>()
     val bandsEvent = bandsEventChannel.receiveAsFlow()
-
 
     fun onBandSelected(bandWithSongs: String) = viewModelScope.launch {
         bandsEventChannel.send(BandsEvent.NavigateToSongsListScreen(bandWithSongs))
     }
+    fun onSongSelected(song: Song) = viewModelScope.launch {
+        bandsEventChannel.send(BandsEvent.NavigateToSingleSongScreen(song))
+    }
+    fun addToFavorite(song: Song, isFavorite: Boolean) = viewModelScope.launch {
+        songDao.update(song.copy(isFavorite = isFavorite))
+    }
 
     sealed class BandsEvent {
         data class NavigateToSongsListScreen(val band: String) : BandsEvent()
+        data class NavigateToSingleSongScreen(val song: Song) : BandsEvent()
     }
 }

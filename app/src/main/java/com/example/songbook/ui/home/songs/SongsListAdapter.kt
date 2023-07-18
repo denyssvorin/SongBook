@@ -7,12 +7,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.songbook.data.Song
 import com.example.songbook.databinding.SongItemBinding
+import com.example.songbook.ui.contract.OnSongClickListener
 
-class UserSongsListAdapter(private val listener: OnItemClickListener)
-    : ListAdapter<Song, UserSongsListAdapter.UserSongsViewHolder>(DiffSongsCallback()) {
+class SongsListAdapter(private val listener: OnSongClickListener)
+    : ListAdapter<Song, SongsListAdapter.UserSongsViewHolder>(DiffSongsCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserSongsViewHolder {
-        val binding = SongItemBinding.inflate( LayoutInflater.from(parent.context), parent,false)
+        val binding = SongItemBinding.inflate(LayoutInflater.from(parent.context), parent,false)
         return UserSongsViewHolder(binding)
     }
 
@@ -29,7 +30,7 @@ class UserSongsListAdapter(private val listener: OnItemClickListener)
                     val position = adapterPosition
                     if (position != RecyclerView.NO_POSITION) {
                         val song = getItem(position)
-                        listener.onItemClick(song)
+                        listener.onSongClick(song)
                     }
                 }
                 iconAddToFavorite.setOnClickListener {
@@ -47,12 +48,6 @@ class UserSongsListAdapter(private val listener: OnItemClickListener)
                 iconAddToFavorite.isChecked = song.isFavorite
             }
         }
-    }
-
-    interface OnItemClickListener {
-        fun onItemClick(song: Song)
-
-        fun addToFavorite(song: Song, isFavorite: Boolean)
     }
 
     class DiffSongsCallback: DiffUtil.ItemCallback<Song>() {

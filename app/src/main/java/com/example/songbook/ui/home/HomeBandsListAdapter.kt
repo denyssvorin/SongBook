@@ -5,11 +5,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.songbook.data.Song
 import com.example.songbook.databinding.BandItemBinding
+import com.example.songbook.ui.contract.OnBandClickListener
 
-class UserHomeBandsListAdapter (private val listener: OnItemClickListener)
-    : ListAdapter<String, UserHomeBandsListAdapter.UserBandsViewHolder>(DiffBandsCallback()) {
+class HomeBandsListAdapter (private val listener: OnBandClickListener)
+    : ListAdapter<String, HomeBandsListAdapter.UserBandsViewHolder>(DiffBandsCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserBandsViewHolder {
         val binding = BandItemBinding.inflate(LayoutInflater.from(parent.context), parent,false)
@@ -29,7 +29,7 @@ class UserHomeBandsListAdapter (private val listener: OnItemClickListener)
                     val position = adapterPosition
                     if (position != RecyclerView.NO_POSITION) {
                         val band = getItem(position)
-                        listener.onItemClick(band)
+                        listener.onBandClick(band)
                     }
                 }
             }
@@ -38,10 +38,6 @@ class UserHomeBandsListAdapter (private val listener: OnItemClickListener)
         fun bind(band: String) {
             binding.textViewBandItem.text = band
         }
-    }
-
-    interface OnItemClickListener {
-        fun onItemClick(bandWithSongs: String)
     }
 
     class DiffBandsCallback : DiffUtil.ItemCallback<String>() {

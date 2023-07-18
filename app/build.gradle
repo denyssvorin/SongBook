@@ -56,6 +56,9 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$testExtJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
 
+    //RecyclerView
+    implementation "androidx.recyclerview:recyclerview:1.3.0"
+
     //Preferences for LanguageHelper
     implementation "androidx.preference:preference-ktx:1.2.0"
 

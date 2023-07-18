@@ -12,11 +12,4 @@
         android:layout_height="wrap_content"
         tools:listitem="@layout/band_item"/>
 
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_song_searched"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:listitem="@layout/song_searched_item"/>
-
 </LinearLayout>

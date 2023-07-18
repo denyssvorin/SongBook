@@ -1,17 +1,18 @@
 package com.example.songbook.ui.home
 
-import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.*
-import android.widget.EditText
+import android.view.MenuItem.OnActionExpandListener
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.isNotEmpty
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.songbook.R
 import com.example.songbook.data.Song
@@ -24,14 +25,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
 
-    private val viewModel : HomeViewModel by viewModels()
+    private val viewModel: HomeViewModel by viewModels()
     private var _binding: FragmentHomeBinding? = null
 
-    private val bandAdapter : HomeBandsListAdapter by lazy { HomeBandsListAdapter(this) }
-    private val songAdapter : SongSearchListAdapter by lazy { SongSearchListAdapter(this) }
+    private val bandAdapter: HomeBandsListAdapter by lazy { HomeBandsListAdapter(this) }
+    private val songAdapter: SongSearchListAdapter by lazy { SongSearchListAdapter(this) }
+    private val concatAdapter = ConcatAdapter(bandAdapter, songAdapter)
     private lateinit var searchView: SearchView
     private lateinit var searchViewItem: MenuItem
-
 
 
     // This property is only valid between onCreateView and
@@ -51,10 +52,8 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
     override fun onViewCreated(itemView: View, savedInstanceState: Bundle?) {
         super.onViewCreated(itemView, savedInstanceState)
 
-        binding.recyclerViewBand.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = bandAdapter
-        }
+        initBandAdapter()
+
         viewModel.bands.observe(viewLifecycleOwner) {
             bandAdapter.submitList(it)
         }
@@ -63,13 +62,17 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
             viewModel.bandsEvent.collect() { event ->
                 when (event) {
                     is HomeViewModel.BandsEvent.NavigateToSongsListScreen -> {
-                        val action = HomeFragmentDirections.actionNavigationHomeToSongsFragment(event.band)
+                        val action =
+                            HomeFragmentDirections.actionNavigationHomeToSongsFragment(event.band)
                         findNavController().navigate(action)
                     }
 
                     is HomeViewModel.BandsEvent.NavigateToSingleSongScreen -> {
-                        val action = HomeFragmentDirections.actionNavigationHomeToSingleSongFragment(event.song,
-                            event.song.songName)
+                        val action =
+                            HomeFragmentDirections.actionNavigationHomeToSingleSongFragment(
+                                event.song,
+                                event.song.songName
+                            )
                         findNavController().navigate(action)
                     }
                 }
@@ -92,15 +95,35 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
                 searchViewItem = menu.findItem(R.id.action_search)
                 searchView = searchViewItem.actionView as SearchView
 
+                searchViewItem.setOnActionExpandListener(object : OnActionExpandListener{
+                    override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+
+                        if (searchView.isNotEmpty()) {
+                            initSongList()
+                            binding.recyclerViewBand.adapter = concatAdapter
+                        } else {
+                            initBandAdapter()
+                        }
+                        return true
+                    }
+
+                    override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                        initBandAdapter()
+                        return true
+                    }
+
+                })
+
                 val pendingQuery = viewModel.searchQuery.value
                 if (pendingQuery.isNotEmpty()) {
                     searchViewItem.expandActionView()
                     searchView.setQuery(pendingQuery, false)
+
                 }
                 searchView.onQueryTextChanged {
                     viewModel.searchQuery.value = it
-                    initSongList()
                 }
+
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -111,14 +134,18 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
     }
 
     private fun initSongList() {
-        binding.recyclerViewSongSearched.apply {
-            layoutManager = LinearLayoutManager(activity)
-            adapter = songAdapter
-        }
         viewModel.songs.observe(viewLifecycleOwner) { songList ->
             songAdapter.submitList(songList)
         }
     }
+
+    private fun initBandAdapter() {
+        binding.recyclerViewBand.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = bandAdapter
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

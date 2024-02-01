@@ -29,8 +29,6 @@ class SongsFragment : Fragment(), OnSongClickListener {
 
     private val viewModel : SongsViewModel by viewModels()
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     private val songAdapter = SongsListAdapter(this)

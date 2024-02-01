@@ -1,8 +1,7 @@
 package com.example.songbook.ui.singlesong
 
-import android.animation.Animator
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
@@ -10,7 +9,7 @@ import android.util.TypedValue
 import android.view.*
 import android.view.View.GONE
 import android.view.animation.LinearInterpolator
-import android.widget.TextView
+import android.widget.ScrollView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
@@ -21,15 +20,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import com.example.songbook.R
-import com.example.songbook.data.Song
 import com.example.songbook.databinding.FragmentSingleSongBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_main.view.*
-import kotlin.math.abs
+
 
 @AndroidEntryPoint
-class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickListener,
+class SingleSongFragment : Fragment(),
     BottomSheetChangeTextSize.BottomSheetListener {
 
     private val args: SingleSongFragmentArgs by navArgs()
@@ -41,17 +38,13 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
     private lateinit var addToFavoriteIcon: MenuItem
 
     private lateinit var iconScroll: MenuItem
-    private var isScrolling = false
+    private lateinit var scrollView: ScrollView
 
-    private lateinit var textView: TextView
+    private var customAnimationSpeed = 20_000
 
-    private var scrollStartPosition = 0
-    private var scrollEndPosition = 0
-    private var isUserScrolling = false
-    private var currentScrollPosition = 0
+    private var scrolledHeight: Int = 0
 
-
-    private lateinit var animator: ValueAnimator
+    private var animator: ValueAnimator? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,32 +61,41 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
         setupFromSharPref()
 
         binding.textViewTextSong.text = args.song.textSong
-        viewModel.isFavorite = viewModel.resultSuccessFavorite.value ?: args.song.isFavorite
-        viewModel.resultSuccessFavorite.observe(viewLifecycleOwner) { favValue ->
+        scrollView = binding.scrollView
+
+        viewModel.isFavorite = viewModel.favoriteDisposableValue.value ?: args.song.isFavorite
+        viewModel.favoriteDisposableValue.observe(viewLifecycleOwner) { favValue ->
             if (favValue) {
                 addToFavoriteIcon.setIcon(R.drawable.ic_favorite_checked)
                 showAddCustomToast()
             } else {
-                addToFavoriteIcon.setIcon(R.drawable.ic_favorite_border)
+                addToFavoriteIcon.setIcon(R.drawable.ic_favorite_unchecked)
                 showRemoveCustomToast()
             }
         }
 
-        textView = binding.textViewTextSong
-        viewModel.isScrollIcon = isScrolling
-
         val orientation = resources.configuration.orientation
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            hideBottomNavigation()
+        checkScreenOrientation(orientation)
+
+        viewModel.isUserScroll.observe(viewLifecycleOwner) { isUserScrollValue ->
+            if (isUserScrollValue) {
+                scrolledHeight = binding.scrollView.scrollY
+                startScrolling()
+            } else {
+                stopScrolling()
+            }
         }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        checkScreenOrientation(newConfig.orientation)
+    }
 
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    private fun checkScreenOrientation(orientation: Int) {
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             hideBottomNavigation()
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             showBottomNavigation()
         }
     }
@@ -127,14 +129,15 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
                 addToFavoriteIcon = menu.findItem(R.id.action_add_to_favorite)
                 addToFavoriteIcon.isVisible = true
                 iconScroll = menu.findItem(R.id.action_play)
-                iconScroll.isVisible = false
+                iconScroll.isVisible = true
 
                 if (viewModel.isFavorite) {
                     addToFavoriteIcon.setIcon(R.drawable.ic_favorite_checked)
                 } else {
-                    addToFavoriteIcon.setIcon(R.drawable.ic_favorite_border)
+                    addToFavoriteIcon.setIcon(R.drawable.ic_favorite_unchecked)
                 }
 
+                observePlayIconStatus()
             }
 
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -148,22 +151,20 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
 
                         return true
                     }
+
                     R.id.action_change_text_size -> {
                         val bottomSheet = BottomSheetChangeTextSize(this@SingleSongFragment)
-                        bottomSheet.show(parentFragmentManager, "exampleBottomSheet")
-
+                        bottomSheet.show(
+                            parentFragmentManager,
+                            BottomSheetChangeTextSize.KEY_SHOW_TEXT_SIZE
+                        )
                         return true
                     }
+
                     R.id.action_play -> {
-                        viewModel.setPlayIcon()
-                        if (viewModel.isScrollIcon) {
-                            startScrolling()
-                            Toast.makeText(requireContext(), "text start", Toast.LENGTH_SHORT)
-                                .show()
-                        } else {
-                            stopScrolling()
-                            Toast.makeText(requireContext(), "text stop", Toast.LENGTH_SHORT).show()
-                        }
+                        viewModel.switchPlayIcon()
+                        viewModel.switchUserScrollValue()
+
                         return true
                     }
                 }
@@ -173,82 +174,69 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    private fun startScrolling() {
-        val maxScroll = textView.layout.height - (0.93 * binding.linearLayout.height).toInt()
-        Log.i("TAG", "startScrolling: maxScroll $maxScroll")
-        val duration = abs(maxScroll * 10L)
-
-        val scrollView = binding.scrollView
-        scrollView.post {
-            scrollStartPosition = currentScrollPosition
-            Log.i("TAG", "scrollStartPosition: $scrollStartPosition")
-            scrollEndPosition = maxScroll
-
-            animator = ValueAnimator.ofInt(scrollStartPosition, scrollEndPosition)
-            animator.duration = duration
-            animator.interpolator = LinearInterpolator()
-
-            animator.addUpdateListener { animation ->
-                if (!isUserScrolling) {
-                    val animatedValue = animation.animatedValue as Int
-                    scrollView.scrollTo(0, animatedValue)
-                    currentScrollPosition = animatedValue
-                }
+    private fun observePlayIconStatus() {
+        viewModel.isScrollIcon.observe(viewLifecycleOwner) { autoScroll ->
+            if (autoScroll) {
+                // set pause icon active when text is auto-scrolling
+                iconScroll.icon = getDrawable(requireContext(), R.drawable.ic_pause)
+            } else {
+                // set play icon active when text don't scroll
+                iconScroll.icon = getDrawable(requireContext(), R.drawable.ic_play)
             }
-
-            animator.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator) {}
-
-                override fun onAnimationEnd(animation: Animator) {
-                    isScrolling = false
-                    updateButtonIcon()
-                }
-
-                override fun onAnimationCancel(animation: Animator) {
-                    isScrolling = false
-                    updateButtonIcon()
-                }
-
-                override fun onAnimationRepeat(animation: Animator) {}
-            })
-
-            scrollView.setOnTouchListener { _, event ->
-                if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_MOVE) {
-                    isUserScrolling = true
-                    animator.cancel()
-                } else if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
-                    isUserScrolling = false
-                    currentScrollPosition = scrollView.scrollY
-                    animator.setIntValues(currentScrollPosition, scrollEndPosition)
-                    animator.start()
-                }
-                false
-            }
-
-            animator.start()
         }
-
-        isScrolling = true
-        updateButtonIcon()
     }
 
+    private fun observeAndCalculateNewScrollViewPosition() {
+        scrollView.setOnTouchListener { _, event ->
+            if (animator != null && viewModel.isUserScroll.value == true) {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        stopScrolling()
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+                        if (viewModel.isUserScroll.value == true) {
+                            scrolledHeight = binding.scrollView.scrollY
+                            startScrolling()
+                        }
+                    }
+                }
+            }
+            false
+        }
+    }
+
+    private fun startScrolling() {
+        val textViewHeight = binding.textViewTextSong.height
+        val rootLayoutHeight = binding.rootLayout.height
+
+        val maxScroll = textViewHeight - rootLayoutHeight
+
+        val heightsRelation: Float = scrolledHeight.toFloat() / maxScroll.toFloat()
+
+        val animDuration = (customAnimationSpeed * (1 - heightsRelation)).toLong()
+
+        animator = ValueAnimator.ofInt(scrolledHeight, maxScroll).apply {
+            duration = animDuration
+            interpolator = LinearInterpolator()
+
+            addUpdateListener { animation ->
+                val animatedValue = animation.animatedValue as Int
+                scrollView.scrollTo(scrolledHeight, animatedValue)
+                scrolledHeight = animatedValue
+            }
+
+            observeAndCalculateNewScrollViewPosition()
+
+            start()
+        }
+    }
 
     private fun stopScrolling() {
-        val scrollView = binding.scrollView
-        scrollView.removeCallbacks(null)
-        animator.cancel()
-
-        isScrolling = false
-        updateButtonIcon()
-    }
-
-    private fun updateButtonIcon() {
-        iconScroll.icon = if (isScrolling) {
-            // Встановіть значок зупинки, наприклад, R.drawable.ic_pause
-            getDrawable(requireContext(), R.drawable.ic_pause)
-        } else {
-            // Встановіть значок старту, наприклад, R.drawable.ic_play
-            getDrawable(requireContext(), R.drawable.ic_play)
+        animator?.apply {
+            cancel()
+            removeAllListeners()
+            removeAllUpdateListeners()
         }
     }
 
@@ -277,15 +265,17 @@ class SingleSongFragment : Fragment(), SingleSongViewModel.OnAddToFavoriteClickL
         toast.show()
     }
 
-    override fun addToFavorite(song: Song, isFavorite: Boolean) {
-        viewModel.addToFavoriteSong(song, isFavorite)
-    }
-
     override fun increaseText(value: Float) {
         binding.textViewTextSong.setTextSize(TypedValue.COMPLEX_UNIT_SP, value)
     }
 
     override fun decreaseText(value: Float) {
         binding.textViewTextSong.setTextSize(TypedValue.COMPLEX_UNIT_SP, value)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        scrollView.removeCallbacks(null)
+        animator = null
     }
 }

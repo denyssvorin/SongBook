@@ -19,6 +19,7 @@ class FavoriteBandsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val searchQuery = MutableStateFlow("")
+    val searchQueryLiveData = searchQuery.asLiveData()
 
     private val favSongsFlow = searchQuery.flatMapLatest { query ->
         songDao.getBands(query).map { favSongList ->

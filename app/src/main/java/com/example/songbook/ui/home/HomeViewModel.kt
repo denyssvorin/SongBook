@@ -1,11 +1,10 @@
 package com.example.songbook.ui.home
 
-import android.util.Log
 import androidx.lifecycle.*
 import com.example.songbook.data.Song
 import com.example.songbook.data.SongDao
+import com.example.songbook.repo.SongsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -13,10 +12,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val songDao: SongDao
+    private val songDao: SongDao,
+    private val songsRepository: SongsRepository
 ) : ViewModel() {
 
+    fun retrieveNewLatestData() {
+        songsRepository.fetchDataFromFirebase()
+    }
+
     val searchQuery = MutableStateFlow("")
+    val searchQueryLiveData = searchQuery.asLiveData()
 
     private val bandsFlow = searchQuery.flatMapLatest { query ->
         songDao.getBands(query).map { songList ->
@@ -31,7 +36,6 @@ class HomeViewModel @Inject constructor(
     }.asLiveData()
 
 
-
     private val songsFlow = searchQuery.flatMapLatest { query ->
         songDao.getSongs(query).map { songList ->
             songList.toSet().toList()
@@ -40,7 +44,16 @@ class HomeViewModel @Inject constructor(
 
     val songs = songsFlow.asLiveData()
 
+    private val _itemsNotFoundBoolean = MutableStateFlow(false)
+    val itemsNotFoundBoolean: Flow<Boolean> = _itemsNotFoundBoolean
 
+    val combinedListSize = bandsFlow.combine(songsFlow) { bandsList, songsList ->
+        bandsList.count() + songsList.count()
+    }
+
+    fun setNotFoundStatus(value: Boolean) {
+        _itemsNotFoundBoolean.value = value
+    }
 
     private val bandsEventChannel = Channel<BandsEvent>()
     val bandsEvent = bandsEventChannel.receiveAsFlow()
@@ -48,9 +61,11 @@ class HomeViewModel @Inject constructor(
     fun onBandSelected(bandWithSongs: String) = viewModelScope.launch {
         bandsEventChannel.send(BandsEvent.NavigateToSongsListScreen(bandWithSongs))
     }
+
     fun onSongSelected(song: Song) = viewModelScope.launch {
         bandsEventChannel.send(BandsEvent.NavigateToSingleSongScreen(song))
     }
+
     fun addToFavorite(song: Song, isFavorite: Boolean) = viewModelScope.launch {
         songDao.update(song.copy(isFavorite = isFavorite))
     }

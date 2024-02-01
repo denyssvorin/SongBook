@@ -39,13 +39,10 @@ class LanguageDialogFragment : DialogFragment() {
 
         var selectedItemIndex = sharedPref?.getInt("language_radio_button", 0) ?: 0
 
-        //var selectedLanguage = languageList[selectedItemIndex]
-
         return MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.language))
             .setSingleChoiceItems(languageList, selectedItemIndex) { dialog, which ->
                 selectedItemIndex = which
-                //selectedLanguage = languageList[selectedItemIndex]
             }
             .setNegativeButton(getString(R.string.cancel)) { _, _ -> }
             .setPositiveButton(getString(R.string.confirm)) { dialog, which ->

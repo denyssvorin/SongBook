@@ -1,6 +1,9 @@
 package com.example.songbook.ui.home
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.*
 import android.view.MenuItem.OnActionExpandListener
 import androidx.appcompat.widget.SearchView
@@ -21,6 +24,7 @@ import com.example.songbook.ui.contract.OnBandClickListener
 import com.example.songbook.ui.contract.OnSongClickListener
 import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
@@ -34,9 +38,6 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
     private lateinit var searchView: SearchView
     private lateinit var searchViewItem: MenuItem
 
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -46,6 +47,7 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         setupMenu()
+        loadDataFromFirebase()
         return binding.root
     }
 
@@ -59,7 +61,27 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.bandsEvent.collect() { event ->
+            viewModel.itemsNotFoundBoolean.collect { value ->
+                if (value) {
+                    delay(300)
+                    binding.textViewIfListIsEmpty.visibility = View.VISIBLE
+                } else {
+                    binding.textViewIfListIsEmpty.visibility = View.GONE
+                }
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.combinedListSize.collect { combinedListSize ->
+                if (combinedListSize == 0) {
+                    viewModel.setNotFoundStatus(true)
+                } else {
+                    viewModel.setNotFoundStatus(false)
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.bandsEvent.collect { event ->
                 when (event) {
                     is HomeViewModel.BandsEvent.NavigateToSongsListScreen -> {
                         val action =
@@ -80,6 +102,10 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
         }
     }
 
+    private fun loadDataFromFirebase() {
+        viewModel.retrieveNewLatestData()
+    }
+
     private fun setupMenu() {
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
 
@@ -95,12 +121,21 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
                 searchViewItem = menu.findItem(R.id.action_search)
                 searchView = searchViewItem.actionView as SearchView
 
-                searchViewItem.setOnActionExpandListener(object : OnActionExpandListener{
+                searchViewItem.setOnActionExpandListener(object : OnActionExpandListener {
                     override fun onMenuItemActionExpand(item: MenuItem): Boolean {
 
                         if (searchView.isNotEmpty()) {
-                            initSongList()
+                            observeSongs()
                             binding.recyclerViewBand.adapter = concatAdapter
+
+                            viewModel.searchQueryLiveData.observe(viewLifecycleOwner) { searchText ->
+
+                                if (searchText.isBlank() && searchView.isShown && concatAdapter.itemCount > 0) {
+                                    Log.i("TAG", "HomeFragment onCreateMenu: searchText is blank")
+
+                                    scrollToTop()
+                                }
+                            }
                         } else {
                             initBandAdapter()
                         }
@@ -120,6 +155,7 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
                     searchView.setQuery(pendingQuery, false)
 
                 }
+
                 searchView.onQueryTextChanged {
                     viewModel.searchQuery.value = it
                 }
@@ -133,7 +169,7 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    private fun initSongList() {
+    private fun observeSongs() {
         viewModel.songs.observe(viewLifecycleOwner) { songList ->
             songAdapter.submitList(songList)
         }
@@ -146,11 +182,17 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
         }
     }
 
+    private fun scrollToTop() {
+        Handler(Looper.getMainLooper()).postDelayed({
+            binding.recyclerViewBand.smoothScrollToPosition(0)
+        }, 200)
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
         searchView.setOnQueryTextListener(null)
+        searchViewItem.setOnActionExpandListener(null)
+        _binding = null
     }
 
     override fun onBandClick(bandWithSongs: String) {

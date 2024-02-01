@@ -1,6 +1,7 @@
 package com.example.songbook.ui.favorite
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuHost
@@ -25,8 +26,14 @@ class FavoriteBandsFragment : Fragment(), OnBandClickListener {
     private val viewModel: FavoriteBandsViewModel by viewModels()
     private lateinit var searchView: SearchView
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    // listener to scroll to start of list in searchView
+    private val preDrawListListener = ViewTreeObserver.OnPreDrawListener {
+        if (this.isAdded && _binding != null) {
+            binding.recyclerViewFavBand.scrollToPosition(0)
+        }
+        true
+    }
+
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -46,6 +53,7 @@ class FavoriteBandsFragment : Fragment(), OnBandClickListener {
         binding.recyclerViewFavBand.apply {
             adapter = favBandsAdapter
             layoutManager = LinearLayoutManager(requireContext())
+            viewTreeObserver.addOnPreDrawListener(preDrawListListener)
         }
 
         viewModel.favBands.observe(viewLifecycleOwner) {
@@ -84,6 +92,13 @@ class FavoriteBandsFragment : Fragment(), OnBandClickListener {
                     search.expandActionView()
                     searchView.setQuery(pendingQuery,false)
                 }
+                viewModel.searchQueryLiveData.observe(viewLifecycleOwner) { searchText ->
+                    if (searchText.isBlank() && searchView.isShown) {
+                        Log.i("TAG", "FavoriteBandsFragment onCreateMenu: searchText is blank")
+
+                        preDrawListListener.onPreDraw()
+                    }
+                }
                 searchView.onQueryTextChanged {
                     viewModel.searchQuery.value = it
                 }
@@ -102,6 +117,8 @@ class FavoriteBandsFragment : Fragment(), OnBandClickListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.recyclerViewFavBand.viewTreeObserver.removeOnPreDrawListener(preDrawListListener)
+        searchView.setOnQueryTextListener(null)
         _binding = null
     }
 }

@@ -1,11 +1,8 @@
 package com.example.songbook.ui
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.navigation.NavController
@@ -16,50 +13,20 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.songbook.R
-import com.example.songbook.data.Song
 import com.example.songbook.databinding.ActivityMainBinding
 import com.example.songbook.ui.home.HomeFragment
 import com.example.songbook.ui.singlesong.SingleSongFragment
 import com.example.songbook.util.LanguageHelper
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: MainViewModel by viewModels()
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
-
-    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            // handle system back press from singleSongActivity
-            val navHostFragment =
-                supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-            val innerFragment = navHostFragment.childFragmentManager.fragments.firstOrNull()
-
-            if (innerFragment is SingleSongFragment) {
-                showBottomNavigation()
-            }
-            onSupportNavigateUp()
-
-            // handle back press to exit from app
-            val backStackCount = supportFragmentManager.backStackEntryCount
-            if (backStackCount == 0 && innerFragment is HomeFragment) {
-                finish()
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setupFromSharPref()
@@ -82,7 +49,6 @@ class MainActivity : AppCompatActivity() {
 
         bottom_nav_view.setupWithNavController(navController)
 
-        dataLoadFirebase()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -107,10 +73,6 @@ class MainActivity : AppCompatActivity() {
         val themeIndex = sharedPref.getInt("theme_radio_button", 0)
         setCustomTheme(themeIndex)
 
-    }
-
-    private fun dataLoadFirebase() {
-        viewModel.retrieveNewLatestData()
     }
 
     private fun setLanguage(language: Int) {
@@ -141,5 +103,25 @@ class MainActivity : AppCompatActivity() {
     private fun showBottomNavigation() {
         val navBar = this.findViewById<BottomNavigationView>(R.id.bottom_nav_view)
         navBar?.visibility = View.VISIBLE
+    }
+
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            // handle system back press from singleSongActivity
+            val navHostFragment =
+                supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+            val innerFragment = navHostFragment.childFragmentManager.fragments.firstOrNull()
+
+            if (innerFragment is SingleSongFragment) {
+                showBottomNavigation()
+            }
+            onSupportNavigateUp()
+
+            // handle back press to exit from app
+            val backStackCount = supportFragmentManager.backStackEntryCount
+            if (backStackCount == 0 && innerFragment is HomeFragment) {
+                finish()
+            }
+        }
     }
 }

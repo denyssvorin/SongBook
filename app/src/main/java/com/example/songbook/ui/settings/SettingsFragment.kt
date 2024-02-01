@@ -1,16 +1,10 @@
 package com.example.songbook.ui.settings
 
-import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.fragment.app.Fragment
 import com.example.songbook.R
@@ -21,15 +15,12 @@ import com.example.songbook.ui.settings.dialogs.FontSizeDialogFragment
 import com.example.songbook.ui.settings.dialogs.LanguageDialogFragment
 import com.example.songbook.ui.settings.dialogs.ThemeDialogFragment
 import com.example.songbook.util.LanguageHelper
-import kotlin.properties.Delegates.notNull
 
 
 class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -78,29 +69,30 @@ class SettingsFragment : Fragment() {
             LanguageDialogFragment.REQUEST_KEY,
             viewLifecycleOwner
         ) { _, result ->
-            val which = result.getInt(LanguageDialogFragment.KEY_LANGUAGE_RESPONSE)
-            if (which == 0) {
+            val languageKey = result.getInt(LanguageDialogFragment.KEY_LANGUAGE_RESPONSE)
+            if (languageKey == 0) {
                 val currentLanguage = LanguageHelper.getLanguage(requireContext())
                 val desiredLanguage = "en"
                 if (currentLanguage != desiredLanguage) {
                     LanguageHelper.changeLanguage(requireContext(), desiredLanguage)
-                    // перезапускає MainActivity для зміни тексту в усій програми
-                    val intent = Intent(activity, MainActivity::class.java)
-                    activity?.startActivity(intent)
-                    activity?.finish()
+                    restartMainActivity()
+
                 }
-            } else if (which == 1) {
+            } else if (languageKey == 1) {
                 val currentLanguage = LanguageHelper.getLanguage(requireContext())
                 val desiredLanguage = "uk"
                 if (currentLanguage != desiredLanguage) {
                     LanguageHelper.changeLanguage(requireContext(), desiredLanguage)
-                    // перезапускає MainActivity для зміни тексту в усій програми
-                    val intent = Intent(activity, MainActivity::class.java)
-                    activity?.startActivity(intent)
-                    activity?.finish()
+                    restartMainActivity()
                 }
             }
         }
+    }
+
+    private fun restartMainActivity() {
+        val intent = Intent(activity, MainActivity::class.java)
+        activity?.finish()
+        activity?.startActivity(intent)
     }
 
     private fun showThemeDialogFragment() {

@@ -10,7 +10,7 @@
         android:id="@+id/toast_removed_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_favorite_border" />
+        android:src="@drawable/ic_favorite_unchecked" />
 
     <TextView
         android:id="@+id/toast_removed_text_view"

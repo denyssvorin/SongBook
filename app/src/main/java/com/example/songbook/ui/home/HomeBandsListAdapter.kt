@@ -21,7 +21,8 @@ class HomeBandsListAdapter (private val listener: OnBandClickListener)
         holder.bind(currentItem)
     }
 
-    inner class UserBandsViewHolder(private val binding: BandItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class UserBandsViewHolder(private val binding: BandItemBinding)
+        : RecyclerView.ViewHolder(binding.root) {
 
         init {
             binding.apply {

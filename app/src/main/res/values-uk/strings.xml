@@ -13,7 +13,7 @@
     <string name="add_to_favorite">Додати до улюблених</string>
     <string name="language">Мова</string>
     <string name="theme">Тема</string>
-    <string name="font_size">Розмір шрифту</string>
+    <string name="change_font_size">Змінити розмір шрифту</string>
     <string name="about">Про застосунок</string>
     <string name="cancel">Відмінити</string>
     <string name="confirm">Підтвердити</string>
@@ -34,4 +34,8 @@
     <string name="large">Великий</string>
     <string name="exit">Вийти</string>
     <string name="exit_confirmation">Ви впевнені, що бажаєте закрити програму?</string>
+    <string name="change_scroll_speed_layout_visibility">Змінити видимість макету промотування</string>
+    <string name="start">Почати</string>
+    <string name="hide_scroll_speed_control">Сховати промотування</string>
+    <string name="show_scroll_speed_control">Показати промотування</string>
 </resources>

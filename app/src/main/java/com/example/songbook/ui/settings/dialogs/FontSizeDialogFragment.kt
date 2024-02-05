@@ -3,7 +3,6 @@ package com.example.songbook.ui.settings.dialogs
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
@@ -36,7 +35,7 @@ class FontSizeDialogFragment() : DialogFragment() {
         var selectedFontSize = fontSizeList[selectedItemIndex]
 
         return MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.font_size))
+            .setTitle(getString(R.string.change_font_size))
             .setSingleChoiceItems(fontSizeList, selectedItemIndex) { dialog, which ->
                 selectedItemIndex = which
                 selectedFontSize = fontSizeList[which]

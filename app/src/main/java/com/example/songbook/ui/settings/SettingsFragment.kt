@@ -16,7 +16,6 @@ import com.example.songbook.ui.settings.dialogs.LanguageDialogFragment
 import com.example.songbook.ui.settings.dialogs.ThemeDialogFragment
 import com.example.songbook.util.LanguageHelper
 
-
 class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
@@ -47,10 +46,6 @@ class SettingsFragment : Fragment() {
 
             buttonTheme.setOnClickListener {
                 showThemeDialogFragment()
-            }
-
-            buttonFontSize.setOnClickListener {
-                showFontDialogFragment()
             }
 
             buttonAbout.setOnClickListener {

@@ -64,21 +64,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="4dp" />
 
-                <Button
-                    android:id="@+id/button_font_size"
-                    style="@style/Widget.Material3.Button.TextButton.Icon"
-                    android:layout_width="match_parent"
-                    android:layout_height="55dp"
-                    android:text="@string/font_size"
-                    android:textAlignment="textStart"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="16sp"
-                    app:icon="@drawable/ic_font_size"
-                    app:iconPadding="16dp"
-                    app:iconSize="20dp"
-                    android:visibility="gone"
-                    app:iconTint="?attr/colorOnSurface" />
-
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

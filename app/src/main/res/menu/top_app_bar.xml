@@ -21,25 +21,25 @@
 
     <item
         android:id="@+id/action_change_text_size"
-        android:contentDescription="@string/font_size"
+        android:contentDescription="@string/change_font_size"
         android:icon="@drawable/ic_font_size"
-        android:title="@string/font_size"
+        android:title="@string/change_font_size"
         app:showAsAction="ifRoom"
         android:visible="false"/>
 
     <item
-        android:id="@+id/action_play"
-        android:contentDescription="Play"
+        android:id="@+id/action_start"
+        android:contentDescription="@string/start"
         android:icon="@drawable/ic_play"
-        android:title="Play"
+        android:title="@string/start"
         app:showAsAction="always"
         android:visible="false"/>
 
     <item
-        android:id="@+id/action_more"
-        android:contentDescription="@string/more"
-        android:title="@string/more"
+        android:id="@+id/action_change_scroll_speed_layout_visibility"
+        android:contentDescription="@string/change_scroll_speed_layout_visibility"
+        android:title="@string/change_scroll_speed_layout_visibility"
         app:showAsAction="never"
-        android:visible="false"/>
-
+        android:visible="false"
+        />
 </menu>

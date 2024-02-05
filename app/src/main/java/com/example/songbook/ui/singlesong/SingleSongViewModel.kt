@@ -39,11 +39,32 @@ class SingleSongViewModel @Inject constructor(
         _isScrollIcon.value = _isScrollIcon.value?.not()
     }
 
+    fun setPlayIconValue(booleanValue: Boolean) {
+        _isScrollIcon.value = booleanValue
+    }
+
     private val _isUserScroll = MutableLiveData(false)
     val isUserScroll : LiveData<Boolean> = _isUserScroll
 
     fun switchUserScrollValue() {
         _isUserScroll.value = _isUserScroll.value?.not()
+    }
+
+    fun setUserScrollValue(booleanValue: Boolean) {
+        _isUserScroll.value = booleanValue
+    }
+
+    var customAnimationScrollSpeed = 20_000
+
+    private val _scrollSpeedLayoutVisibilityStatus = MutableLiveData(true)
+    val scrollSpeedLayoutVisibilityStatus: LiveData<Boolean> = _scrollSpeedLayoutVisibilityStatus
+
+    fun switchScrollSpeedVisibility() {
+        _scrollSpeedLayoutVisibilityStatus.value = _scrollSpeedLayoutVisibilityStatus.value?.not()
+    }
+
+    fun setScrollSpeedVisibility(visibility: Boolean) {
+        _scrollSpeedLayoutVisibilityStatus.value = visibility
     }
 
     private fun addToFavoriteSong(song: Song, isFavorite: Boolean) = viewModelScope.launch {

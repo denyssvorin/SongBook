@@ -19,7 +19,7 @@ interface SongDao {
     suspend fun insertSong(song: Song)
 
     @Query("SELECT * FROM song_table WHERE songName LIKE '%' || :searchQuery || '%'")
-    suspend fun getSongByName(searchQuery: String): Song
+    fun getSongByName(searchQuery: String): Flow<Song>
 
     @Update
     suspend fun update(song: Song)

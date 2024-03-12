@@ -3,6 +3,7 @@ package com.example.songbook.repo
 import android.util.Log
 import com.example.songbook.data.Song
 import com.example.songbook.data.SongDao
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -10,6 +11,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,6 +20,31 @@ class SongsRepositoryImpl @Inject constructor(
 ) : SongsRepository {
     private val receivedDataList = mutableListOf<Song>()
     private val databaseReference = Firebase.database.getReference("songs")
+    private val uid = Firebase.auth.uid
+
+//    override suspend fun createPersonalFirestoreDocument(uid: String) {
+//        Log.i(TAG, "createPersonalFirestoreDocument: uid = $uid")
+//
+//        val personalDocumentReference = firestore
+//            .collection(COLLECTION_USERS)
+//            .document(uid)
+//
+//        personalDocumentReference.get()
+//            .addOnSuccessListener { documentSnapshot ->
+//                if (documentSnapshot.exists()) {
+//                    return@addOnSuccessListener
+//                } else {
+//                    // create new document with current time
+//                    val userData = hashMapOf(
+//                        "createdAt" to FieldValue.serverTimestamp()
+//                    )
+//                    personalDocumentReference.set(userData)
+//                }
+//            }
+//            .addOnFailureListener { exception ->
+//                Log.e(TAG, "createPersonalFirestoreDocument: ${exception.message}")
+//            }
+//    }
 
     // Read from the database
     override fun fetchDataFromFirebase() {
@@ -33,7 +60,7 @@ class SongsRepositoryImpl @Inject constructor(
 
                 for (song in receivedDataList) {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val existingSong = songDao.getSongByName(song.songName)
+                        val existingSong = songDao.getSongByName(song.songName).first()
                         val updatedSong = if (existingSong != null) {
                             existingSong.copy(
                                 bandName = song.bandName,
@@ -50,8 +77,12 @@ class SongsRepositoryImpl @Inject constructor(
 
             override fun onCancelled(error: DatabaseError) {
                 // Failed to read value
-                Log.w("TAG", "Failed to read value.", error.toException())
+                Log.w(TAG, "Failed to read value.", error.toException())
             }
         })
+    }
+
+    companion object {
+        const val TAG = "SongsRepositoryImpl"
     }
 }

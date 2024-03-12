@@ -3,9 +3,7 @@ package com.example.songbook.data
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.google.firebase.database.Exclude
-import com.google.firebase.database.PropertyName
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Entity(tableName = "song_table")
 

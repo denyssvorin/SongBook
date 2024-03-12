@@ -21,7 +21,7 @@ class FavoriteBandsViewModel @Inject constructor(
     val searchQuery = MutableStateFlow("")
     val searchQueryLiveData = searchQuery.asLiveData()
 
-    private val favSongsFlow = searchQuery.flatMapLatest { query ->
+    private val _favBandsFlow = searchQuery.flatMapLatest { query ->
         songDao.getBands(query).map { favSongList ->
             favSongList.filter {
                 it.isFavorite
@@ -31,9 +31,9 @@ class FavoriteBandsViewModel @Inject constructor(
         }
     }
 
-    val favBands = favSongsFlow.map {
-        return@map it
-    }.asLiveData()
+    val favBands = _favBandsFlow.asLiveData()
+
+    val isFavListEmpty = _favBandsFlow.map { favBandList -> favBandList.isEmpty() }
 
     private val favBandsEventChannel = Channel<FavEvent>()
     val favBandsEvent = favBandsEventChannel.receiveAsFlow()

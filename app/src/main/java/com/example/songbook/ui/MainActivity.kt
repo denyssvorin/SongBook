@@ -1,10 +1,16 @@
 package com.example.songbook.ui
 
+import android.content.Context
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -16,10 +22,12 @@ import com.example.songbook.R
 import com.example.songbook.databinding.ActivityMainBinding
 import com.example.songbook.ui.home.HomeFragment
 import com.example.songbook.ui.singlesong.SingleSongFragment
-import com.example.songbook.util.LanguageHelper
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.util.Locale
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -28,9 +36,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
+    private val viewModel: MainActivityViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        setupFromSharPref()
         super.onCreate(savedInstanceState)
+        setupFromPreferences()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -44,10 +54,10 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(
             setOf(R.id.navigation_home, R.id.navigation_favorite, R.id.navigation_settings)
         )
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        bottom_nav_view.setupWithNavController(navController)
+        binding.bottomNavView.setupWithNavController(navController)
 
     }
 
@@ -64,40 +74,39 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
-    private fun setupFromSharPref() {
-        val sharedPref = getSharedPreferences("app_settings", MODE_PRIVATE)
+    private fun setupFromPreferences() {
+        lifecycleScope.launchWhenCreated {
+            viewModel.appThemePreferencesFlow.collect { themePreferences ->
+                AppCompatDelegate.setDefaultNightMode(themePreferences.theme)
+            }
+        }
 
-        val language = sharedPref.getInt("language_radio_button", 0)
-        setLanguage(language)
-
-        val themeIndex = sharedPref.getInt("theme_radio_button", 0)
-        setCustomTheme(themeIndex)
+        lifecycleScope.launchWhenStarted {
+            viewModel.appLanguagePreferencesFlow.collect { languagePreferences ->
+                changeLanguage(this@MainActivity, languagePreferences.language)
+            }
+        }
 
     }
 
-    private fun setLanguage(language: Int) {
-        if (language == 0) {
-            val desiredLanguage = "en"
-            LanguageHelper.changeLanguage(this, desiredLanguage)
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun changeLanguage(context: Context, language: String) {
+        val configuration = context.resources.configuration
+        val currentLanguage = configuration.locales[0].language
 
-        } else if (language == 1) {
-            val desiredLanguage = "uk"
-            LanguageHelper.changeLanguage(this, desiredLanguage)
+        if (currentLanguage != language) {
+            val locale = Locale(language)
+            Locale.setDefault(locale)
+
+            val config = Configuration()
+            config.setLocale(locale)
+
+            context.resources.updateConfiguration(config, context.resources.displayMetrics)
+            restartMainActivity()
         }
     }
-
-    private fun setCustomTheme(themeIndex: Int) {
-        when (themeIndex) {
-            0 -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-            }
-            1 -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
-            2 -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            }
-        }
+    private fun restartMainActivity() {
+        this.recreate()
     }
 
     private fun showBottomNavigation() {

@@ -23,8 +23,11 @@ import com.example.songbook.databinding.FragmentHomeBinding
 import com.example.songbook.ui.contract.OnBandClickListener
 import com.example.songbook.ui.contract.OnSongClickListener
 import com.example.songbook.util.onQueryTextChanged
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
@@ -47,39 +50,36 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         setupMenu()
-        loadDataFromFirebase()
         return binding.root
     }
 
-    override fun onViewCreated(itemView: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(itemView, savedInstanceState)
+    override fun onStart() {
+        super.onStart()
+        // to hide songs when user came back to the program
+        observeAuthenticationState()
+    }
 
-        initBandAdapter()
-
+    private fun collectBandList() {
+        viewModel.retrieveNewLatestData()
         viewModel.bands.observe(viewLifecycleOwner) {
             bandAdapter.submitList(it)
         }
+    }
 
+    private fun collectEmptyListValue() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.itemsNotFoundBoolean.collect { value ->
-                if (value) {
-                    delay(300)
+            viewModel.isCombinedListEmpty.collectLatest { isListEmpty ->
+                if (isListEmpty) {
+                    delay(2000)
                     binding.textViewIfListIsEmpty.visibility = View.VISIBLE
                 } else {
                     binding.textViewIfListIsEmpty.visibility = View.GONE
                 }
             }
         }
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.combinedListSize.collect { combinedListSize ->
-                if (combinedListSize == 0) {
-                    viewModel.setNotFoundStatus(true)
-                } else {
-                    viewModel.setNotFoundStatus(false)
-                }
-            }
-        }
+    }
 
+    private fun collectNavigation() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.bandsEvent.collect { event ->
                 when (event) {
@@ -93,7 +93,7 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
                         val action =
                             HomeFragmentDirections.actionNavigationHomeToSingleSongFragment(
                                 event.song,
-                                event.song.songName
+                                event.song.songName // to set name in toolbar
                             )
                         findNavController().navigate(action)
                     }
@@ -102,8 +102,15 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
         }
     }
 
-    private fun loadDataFromFirebase() {
-        viewModel.retrieveNewLatestData()
+    private fun observeAuthenticationState() {
+        val user = Firebase.auth.currentUser
+        viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+            if (user != null) {
+                initUi()
+            } else {
+                findNavController().navigate(R.id.loginFragment)
+            }
+        }
     }
 
     private fun setupMenu() {
@@ -125,6 +132,7 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
                     override fun onMenuItemActionExpand(item: MenuItem): Boolean {
 
                         if (searchView.isNotEmpty()) {
+                            viewModel.startCollect()
                             observeSongs()
                             binding.recyclerViewBand.adapter = concatAdapter
 
@@ -143,6 +151,7 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
                     }
 
                     override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                        viewModel.stopCollect()
                         initBandAdapter()
                         return true
                     }
@@ -159,7 +168,6 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
                 searchView.onQueryTextChanged {
                     viewModel.searchQuery.value = it
                 }
-
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -170,9 +178,16 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
     }
 
     private fun observeSongs() {
-        viewModel.songs.observe(viewLifecycleOwner) { songList ->
+        viewModel.songsList.observe(viewLifecycleOwner) { songList ->
             songAdapter.submitList(songList)
         }
+    }
+
+    private fun initUi() {
+        initBandAdapter()
+        collectBandList()
+        collectEmptyListValue()
+        collectNavigation()
     }
 
     private fun initBandAdapter() {
@@ -190,8 +205,11 @@ class HomeFragment : Fragment(), OnBandClickListener, OnSongClickListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        searchView.setOnQueryTextListener(null)
-        searchViewItem.setOnActionExpandListener(null)
+        Log.i("TAG", "onDestroyView: ")
+        if (::searchView.isInitialized && ::searchViewItem.isInitialized) {
+            searchView.setOnQueryTextListener(null)
+            searchViewItem.setOnActionExpandListener(null)
+        }
         _binding = null
     }
 

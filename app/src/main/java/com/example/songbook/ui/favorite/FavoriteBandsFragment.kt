@@ -1,11 +1,14 @@
 package com.example.songbook.ui.favorite
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.isNotEmpty
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -18,6 +21,8 @@ import com.example.songbook.ui.contract.OnBandClickListener
 import com.example.songbook.ui.home.HomeBandsListAdapter
 import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 
 @AndroidEntryPoint
 class FavoriteBandsFragment : Fragment(), OnBandClickListener {
@@ -25,14 +30,8 @@ class FavoriteBandsFragment : Fragment(), OnBandClickListener {
     private var _binding: FragmentFavoriteBinding? = null
     private val viewModel: FavoriteBandsViewModel by viewModels()
     private lateinit var searchView: SearchView
-
-    // listener to scroll to start of list in searchView
-    private val preDrawListListener = ViewTreeObserver.OnPreDrawListener {
-        if (this.isAdded && _binding != null) {
-            binding.recyclerViewFavBand.scrollToPosition(0)
-        }
-        true
-    }
+    private lateinit var searchViewItem: MenuItem
+    private val favBandAdapter: HomeBandsListAdapter by lazy { HomeBandsListAdapter(this) }
 
     private val binding get() = _binding!!
 
@@ -49,23 +48,22 @@ class FavoriteBandsFragment : Fragment(), OnBandClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val favBandsAdapter = HomeBandsListAdapter(this)
         binding.recyclerViewFavBand.apply {
-            adapter = favBandsAdapter
+            adapter = favBandAdapter
             layoutManager = LinearLayoutManager(requireContext())
-            viewTreeObserver.addOnPreDrawListener(preDrawListListener)
         }
 
         viewModel.favBands.observe(viewLifecycleOwner) {
-            favBandsAdapter.submitList(it)
+            Log.i("FavFragment", "onViewCreated: favBandList = $it")
+            favBandAdapter.submitList(it)
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.favBandsEvent.collect() { event ->
+            viewModel.favBandsEvent.collect { event ->
                 when (event) {
                     is FavoriteBandsViewModel.FavEvent.NavigateToFavSongsScreen -> {
-                       val action = FavoriteBandsFragmentDirections
-                           .actionNavigationFavoriteToFavoriteSongsFragment(event.favBand)
+                        val action = FavoriteBandsFragmentDirections
+                            .actionNavigationFavoriteToFavoriteSongsFragment(event.favBand)
                         findNavController().navigate(action)
                     }
                 }
@@ -81,24 +79,42 @@ class FavoriteBandsFragment : Fragment(), OnBandClickListener {
                 val searchIcon = menu.findItem(R.id.action_search)
                 searchIcon.isVisible = true
             }
+
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_app_bar, menu)
 
-                val search = menu.findItem(R.id.action_search)
-                searchView = search.actionView as SearchView
+                searchViewItem = menu.findItem(R.id.action_search)
+                searchView = searchViewItem.actionView as SearchView
+
+                collectEmptyListValue()
+
+                searchViewItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+                    override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+
+                        if (searchView.isNotEmpty()) {
+                            viewModel.searchQueryLiveData.observe(viewLifecycleOwner) { searchText ->
+
+                                if (searchText.isBlank() && searchView.isShown && favBandAdapter.itemCount > 0) {
+                                    Log.i("TAG", "HomeFragment onCreateMenu: searchText is blank")
+
+                                    scrollToTop()
+                                }
+                            }
+                        }
+                        return true
+                    }
+
+                    override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                        return true
+                    }
+                })
 
                 val pendingQuery = viewModel.searchQuery.value
                 if (pendingQuery.isNotEmpty()) {
-                    search.expandActionView()
-                    searchView.setQuery(pendingQuery,false)
+                    searchViewItem.expandActionView()
+                    searchView.setQuery(pendingQuery, false)
                 }
-                viewModel.searchQueryLiveData.observe(viewLifecycleOwner) { searchText ->
-                    if (searchText.isBlank() && searchView.isShown) {
-                        Log.i("TAG", "FavoriteBandsFragment onCreateMenu: searchText is blank")
 
-                        preDrawListListener.onPreDraw()
-                    }
-                }
                 searchView.onQueryTextChanged {
                     viewModel.searchQuery.value = it
                 }
@@ -111,14 +127,40 @@ class FavoriteBandsFragment : Fragment(), OnBandClickListener {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
+    private fun scrollToTop() {
+        Handler(Looper.getMainLooper()).postDelayed({
+            binding.recyclerViewFavBand.smoothScrollToPosition(0)
+        }, 200)
+    }
+
+    private fun collectEmptyListValue() {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.isFavListEmpty.collectLatest { isListEmpty ->
+                if (isListEmpty && searchView.isShown && binding.textViewFavListIsEmpty.visibility == View.GONE) {
+                    delay(2000)
+                    binding.textViewIfListIsEmpty.visibility = View.VISIBLE
+                } else if (searchView.isShown) {
+                    binding.textViewIfListIsEmpty.visibility = View.GONE
+                } else if (isListEmpty) {
+                    delay(1000)
+                    binding.textViewFavListIsEmpty.visibility = View.VISIBLE
+                } else {
+                    binding.textViewFavListIsEmpty.visibility = View.GONE
+                }
+            }
+        }
+    }
+
     override fun onBandClick(bandWithSongs: String) {
         viewModel.onBandSelected(bandWithSongs)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.recyclerViewFavBand.viewTreeObserver.removeOnPreDrawListener(preDrawListListener)
-        searchView.setOnQueryTextListener(null)
+        if (::searchView.isInitialized) {
+            searchView.setOnQueryTextListener(null)
+            searchViewItem.setOnActionExpandListener(null)
+        }
         _binding = null
     }
 }

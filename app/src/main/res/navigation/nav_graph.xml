@@ -90,4 +90,11 @@
             app:popExitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
+    <fragment
+        android:id="@+id/loginFragment"
+        android:label="Login"
+        android:name="com.example.songbook.ui.login.LoginFragment"
+        tools:layout="@layout/fragment_login"/>
+
+
 </navigation>

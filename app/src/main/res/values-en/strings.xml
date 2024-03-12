@@ -38,4 +38,7 @@
     <string name="start">Start</string>
     <string name="hide_scroll_speed_control">Hide scroll speed control</string>
     <string name="show_scroll_speed_control">Show scroll speed control</string>
+    <string name="default_web_client_id">983104111270-it3ob88dsssq841jc54qg0gfc2khitb8.apps.googleusercontent.com</string>
+    <string name="discover_and_play_your_favorite_songs_with_chords">Discover and play your favorite songs with chords!</string>
+    <string name="continue_with_google">Continue with Google</string>
 </resources>

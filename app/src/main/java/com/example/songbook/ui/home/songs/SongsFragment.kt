@@ -27,7 +27,7 @@ class SongsFragment : Fragment(), OnSongClickListener {
     private lateinit var searchView: SearchView
     private val args: SongsFragmentArgs by navArgs()
 
-    private val viewModel : SongsViewModel by viewModels()
+    private val viewModel: SongsViewModel by viewModels()
 
     private val binding get() = _binding!!
 
@@ -52,6 +52,7 @@ class SongsFragment : Fragment(), OnSongClickListener {
         }
 
         viewModel.songs.observe(viewLifecycleOwner) { songList ->
+            Log.i("TAG", "SongsFragment songList = $songList")
             songAdapter.submitList(songList)
         }
 
@@ -59,13 +60,16 @@ class SongsFragment : Fragment(), OnSongClickListener {
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.songsEvent.collect() { event ->
-                 when (event) {
-                     is SongsViewModel.SongsEvent.NavigateToSingleSongScreen -> {
-                         val action = SongsFragmentDirections.actionSongsFragmentToSingleSongFragment(event.song,
-                             event.song.songName)
-                         findNavController().navigate(action)
-                     }
-                 }
+                when (event) {
+                    is SongsViewModel.SongsEvent.NavigateToSingleSongScreen -> {
+                        val action =
+                            SongsFragmentDirections.actionSongsFragmentToSingleSongFragment(
+                                event.song,
+                                event.song.songName // to set name in toolbar
+                            )
+                        findNavController().navigate(action)
+                    }
+                }
             }
         }
     }
@@ -78,6 +82,7 @@ class SongsFragment : Fragment(), OnSongClickListener {
                 val searchIcon = menu.findItem(R.id.action_search)
                 searchIcon.isVisible = true
             }
+
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_app_bar, menu)
 
@@ -96,9 +101,6 @@ class SongsFragment : Fragment(), OnSongClickListener {
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                when(menuItem.itemId) {
-                    R.id.action_add_to_favorite -> ""
-                }
                 return false
             }
 

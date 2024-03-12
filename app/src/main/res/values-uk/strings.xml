@@ -38,4 +38,7 @@
     <string name="start">Почати</string>
     <string name="hide_scroll_speed_control">Сховати промотування</string>
     <string name="show_scroll_speed_control">Показати промотування</string>
+    <string name="discover_and_play_your_favorite_songs_with_chords">Вивчайте та грайте ваші улюблені пісні з акордами!</string>
+    <string name="continue_with_google">Продовжити з Google</string>
+    <string name="default_web_client_id">983104111270-it3ob88dsssq841jc54qg0gfc2khitb8.apps.googleusercontent.com</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.songbook.ui.singlesong
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.Bundle
@@ -14,7 +15,6 @@ import android.widget.ScrollView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
-import androidx.core.content.edit
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -26,7 +26,12 @@ import com.example.songbook.R
 import com.example.songbook.databinding.FragmentSingleSongBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -62,12 +67,16 @@ class SingleSongFragment : Fragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupFromSharPref()
+        setupFromPreferences()
 
-        binding.textViewTextSong.text = args.song.textSong
+        viewModel.getSong(args.song)
+        viewModel.song.observe(viewLifecycleOwner) { song ->
+            binding.textViewTextSong.text = song.textSong
+        }
+
         scrollView = binding.scrollView
 
-        viewModel.isFavorite = viewModel.favoriteDisposableValue.value ?: args.song.isFavorite
+        viewModel.isFavorite = args.song.isFavorite
         viewModel.favoriteDisposableValue.observe(viewLifecycleOwner) { favValue ->
             if (favValue) {
                 addToFavoriteIcon.setIcon(R.drawable.ic_favorite_checked)
@@ -81,6 +90,10 @@ class SingleSongFragment : Fragment(),
         val orientation = resources.configuration.orientation
         checkScreenOrientation(orientation)
 
+        observeUserScrollStatus()
+    }
+
+    private fun observeUserScrollStatus() {
         viewModel.isUserScroll.observe(viewLifecycleOwner) { isUserScrollValue ->
             if (isUserScrollValue) {
                 scrolledHeight = binding.scrollView.scrollY
@@ -187,7 +200,7 @@ class SingleSongFragment : Fragment(),
                     }
 
                     R.id.action_change_scroll_speed_layout_visibility -> {
-                        viewModel.switchScrollSpeedVisibility()
+                        viewModel.switchScrollSpeedLayoutVisibility()
 
                         return true
                     }
@@ -210,26 +223,6 @@ class SingleSongFragment : Fragment(),
         }
     }
 
-    private fun observeAndCalculateNewScrollViewPosition() {
-        scrollView.setOnTouchListener { _, event ->
-            if (animator != null && viewModel.isUserScroll.value == true) {
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        stopScrolling()
-                    }
-
-                    MotionEvent.ACTION_UP -> {
-                        if (viewModel.isUserScroll.value == true) {
-                            scrolledHeight = binding.scrollView.scrollY
-                            startScrolling()
-                        }
-                    }
-                }
-            }
-            false
-        }
-    }
-
     private fun startScrolling() {
         Log.i("TAG", "speed = ${viewModel.customAnimationScrollSpeed} ")
         val textViewHeight = binding.textViewTextSong.height
@@ -239,7 +232,8 @@ class SingleSongFragment : Fragment(),
 
         val heightsRelation: Float = scrolledHeight.toFloat() / maxScroll.toFloat()
 
-        val animDuration = (viewModel.customAnimationScrollSpeed * (1 - heightsRelation)).toLong()
+        val animDuration =
+            (viewModel.customAnimationScrollSpeed * (1 - heightsRelation)).toLong()
 
         animator = ValueAnimator.ofInt(scrolledHeight, maxScroll).apply {
             duration = animDuration
@@ -265,66 +259,132 @@ class SingleSongFragment : Fragment(),
         }
     }
 
-    private fun setupFromSharPref() {
+    @SuppressLint("ClickableViewAccessibility")
+    private fun observeAndCalculateNewScrollViewPosition() {
+        scrollView.setOnTouchListener { _, event ->
+            if (animator != null && viewModel.isUserScroll.value == true) {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        stopScrolling()
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+                        if (viewModel.isUserScroll.value == true) {
+                            scrolledHeight = binding.scrollView.scrollY
+                            startScrolling()
+                        }
+                    }
+                }
+            }
+            false
+        }
+    }
+
+    private fun setupFromPreferences() {
         val sharedPref =
             activity?.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
 
         setupSongTextSize(sharedPref)
         setupAnimationScrollSpeed(sharedPref)
-        setupChangeScrollSpeedVisibilityStatus(sharedPref)
+        setupScrollLayoutVisibilityStatus(sharedPref)
     }
 
-    private fun showAddCustomToast() {
-        val toast = Toast.makeText(requireContext(), "", Toast.LENGTH_SHORT)
-        val root: ViewGroup? = null
-        val toastLayout = layoutInflater.inflate(R.layout.custom_toast_add_layout, root)
-        toast.view = toastLayout
-        toast.show()
-    }
-
-    private fun showRemoveCustomToast() {
-        val toast = Toast.makeText(requireContext(), "", Toast.LENGTH_SHORT)
-        val root: ViewGroup? = null
-        val toastLayout = layoutInflater.inflate(R.layout.custom_toast_remove_layout, root)
-        toast.view = toastLayout
-        toast.show()
-    }
-
-    override fun increaseText(value: Float) {
+    override fun changeTextSize(value: Float) {
         binding.textViewTextSong.setTextSize(TypedValue.COMPLEX_UNIT_SP, value)
     }
 
-    override fun decreaseText(value: Float) {
-        binding.textViewTextSong.setTextSize(TypedValue.COMPLEX_UNIT_SP, value)
-    }
-
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupAnimationScrollSpeed(sharedPref: SharedPreferences?) {
-        val savedAnimationSpeedValue =
+
+        /*val savedAnimationSpeedValue =
             sharedPref?.getInt(
                 "single_song_animation_speed",
                 viewModel.customAnimationScrollSpeed
-            ) ?: 20_000
+            ) ?: DEFAULT_ANIM_SPEED
 
-        viewModel.customAnimationScrollSpeed = savedAnimationSpeedValue
+        viewModel.customAnimationScrollSpeed = savedAnimationSpeedValue*/
 
-        // increase scroll animation speed
-        binding.imageFastForward.setOnClickListener {
-            if (viewModel.customAnimationScrollSpeed in 4_000..70_000) {
-                viewModel.customAnimationScrollSpeed -= 2_000
-
-                Log.i("TAG", "increase: speed = ${viewModel.customAnimationScrollSpeed}")
-                restartAnimation()
+        lifecycleScope.launchWhenStarted {
+            viewModel.singleSongScrollAnimationPreferencesFlow.collect { scrollAnimationSpeedPref ->
+                viewModel.customAnimationScrollSpeed = scrollAnimationSpeedPref.scrollAnimationSpeed
             }
         }
 
-        // decrease scroll animation speed
-        binding.imageFastRewind.setOnClickListener {
-            if (viewModel.customAnimationScrollSpeed in 2_000..68_000) {
-                viewModel.customAnimationScrollSpeed += 2_000
 
-                Log.i("TAG", "decrease: speed = ${viewModel.customAnimationScrollSpeed}")
-                restartAnimation()
+        var job: Job? = null
+        val interval = 200L
+
+        // decrease scroll animation speed
+        binding.imageButtonFastRewind.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    if (viewModel.customAnimationScrollSpeed in 20_000..150_000) {
+                        job = CoroutineScope(Dispatchers.Main).launch {
+                            while (isActive) {
+                                Log.d("MyApp", "Action performed with interval")
+
+                                decreaseAnimationSpeed()
+                                delay(interval)
+                            }
+                        }
+                    }
+                    true
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    job?.cancel()
+                    Log.d("TAG", "job canceled")
+                    true
+                }
+
+                else -> false
             }
+        }
+
+        // increase scroll animation speed
+        binding.imageButtonFastForward.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    if (viewModel.customAnimationScrollSpeed in 30_000..160_000) {
+                        job = CoroutineScope(Dispatchers.Main).launch {
+                            while (isActive) {
+                                Log.d("MyApp", "Action performed with interval")
+
+                                increaseAnimationSpeed()
+                                delay(interval)
+                            }
+                        }
+                    }
+                    true
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    job?.cancel()
+                    Log.d("TAG", "job canceled")
+                    true
+                }
+
+                else -> false
+            }
+        }
+    }
+
+
+    private fun decreaseAnimationSpeed() {
+        if (viewModel.customAnimationScrollSpeed in 20_000..150_000) {
+            viewModel.customAnimationScrollSpeed += 10_000
+
+            Log.i("TAG", "decrease: speed = ${viewModel.customAnimationScrollSpeed}")
+            restartAnimation()
+        }
+    }
+
+    private fun increaseAnimationSpeed() {
+        if (viewModel.customAnimationScrollSpeed in 30_000..160_000) {
+            viewModel.customAnimationScrollSpeed -= 10_000
+
+            Log.i("TAG", "increase: speed = ${viewModel.customAnimationScrollSpeed}")
+            restartAnimation()
         }
     }
 
@@ -338,29 +398,32 @@ class SingleSongFragment : Fragment(),
         }
     }
 
-    private fun saveScrollSpeed(animationSpeed: Int) {
-        val sharedPref =
-            activity?.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
+    private fun setupSongTextSize(sharedPref: SharedPreferences?) {
 
-        sharedPref?.edit {
-            putInt("single_song_animation_speed", animationSpeed)
-            apply()
+/*        val savedTextSize = sharedPref?.getInt("single_song_text_size", 16) ?: 16
+
+        binding.textViewTextSong.textSize = savedTextSize.toFloat()*/
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.singleSongTextSizePreferencesFlow.collect { textSizePreferences ->
+                changeTextSize(textSizePreferences.textSize.toFloat())
+            }
         }
     }
 
-    private fun setupSongTextSize(sharedPref: SharedPreferences?) {
-        val savedTextSize = sharedPref?.getInt("single_song_text_size", 16) ?: 16
-
-        binding.textViewTextSong.textSize = savedTextSize.toFloat()
-    }
-
-    private fun setupChangeScrollSpeedVisibilityStatus(sharedPref: SharedPreferences?) {
-        val savedVisibility = sharedPref?.getBoolean(
+    private fun setupScrollLayoutVisibilityStatus(sharedPref: SharedPreferences?) {
+        /*val savedVisibility = sharedPref?.getBoolean(
             "scroll_speed_layout_visibility",
             viewModel.scrollSpeedLayoutVisibilityStatus.value!!
-        ) ?: true
+        ) ?: true*/
 
-        viewModel.setScrollSpeedVisibility(savedVisibility)
+        lifecycleScope.launchWhenStarted {
+            viewModel.singleSongScrollAnimationPreferencesFlow.collect { scrollSpeedPref ->
+                viewModel.setScrollSpeedLayoutVisibility(scrollSpeedPref.scrollSpeedVisibility)
+            }
+        }
+
+//        viewModel.setScrollSpeedVisibility(savedVisibility)
 
         viewModel.scrollSpeedLayoutVisibilityStatus.observe(viewLifecycleOwner) { visibilityStatus ->
             if (visibilityStatus) {
@@ -377,20 +440,33 @@ class SingleSongFragment : Fragment(),
             }
         }
     }
-
-    private fun saveChangeScrollSpeedVisibilityStatus(visibility: Boolean) {
-        val sharedPref =
-            activity?.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
-
-        sharedPref?.edit {
-            putBoolean(
-                "scroll_speed_layout_visibility",
-                visibility
-            )
-            apply()
-        }
-
+    private fun showAddCustomToast() {
+        val toast = Toast.makeText(requireContext(), "", Toast.LENGTH_SHORT)
+        val root: ViewGroup? = null
+        val toastLayout = layoutInflater.inflate(R.layout.custom_toast_add_layout, root)
+        toast.view = toastLayout
+        toast.show()
     }
+
+    private fun showRemoveCustomToast() {
+        val toast = Toast.makeText(requireContext(), "", Toast.LENGTH_SHORT)
+        val root: ViewGroup? = null
+        val toastLayout = layoutInflater.inflate(R.layout.custom_toast_remove_layout, root)
+        toast.view = toastLayout
+        toast.show()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val animationSpeed = viewModel.customAnimationScrollSpeed
+        Log.i("TAG", "onPause: animationSpeed = $animationSpeed")
+        viewModel.saveScrollAnimationSpeed(animationSpeed)
+
+        val visibility = viewModel.scrollSpeedLayoutVisibilityStatus.value
+        viewModel.saveScrollSpeedLayoutVisibility(visibility!!)
+    }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -398,7 +474,5 @@ class SingleSongFragment : Fragment(),
         animator = null
         viewModel.setUserScrollValue(false)
         viewModel.setPlayIconValue(false)
-        saveScrollSpeed(viewModel.customAnimationScrollSpeed)
-        saveChangeScrollSpeedVisibilityStatus(viewModel.scrollSpeedLayoutVisibilityStatus.value!!)
     }
 }

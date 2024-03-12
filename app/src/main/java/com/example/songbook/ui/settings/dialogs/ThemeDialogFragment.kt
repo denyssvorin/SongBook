@@ -2,59 +2,63 @@ package com.example.songbook.ui.settings.dialogs
 
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.songbook.R
+import com.example.songbook.ui.settings.SettingsViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.util.*
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class ThemeDialogFragment : DialogFragment() {
 
-    private lateinit var themeList: Array<String>
+    private lateinit var themeMap: Map<Int, String>
+    private var savedTheme = MODE_NIGHT_FOLLOW_SYSTEM
+
+    private val viewModelSettings: SettingsViewModel by viewModels()
 
     // initializing in onAttach because these variables requires context
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        themeList = arrayOf(
-            getString(R.string.use_system_theme),
-            requireContext().getString(R.string.light),
-            requireContext().getString(R.string.dark)
+        themeMap = mapOf(
+            MODE_NIGHT_FOLLOW_SYSTEM to getString(R.string.use_system_theme),
+            MODE_NIGHT_NO to getString(R.string.light),
+            MODE_NIGHT_YES to getString(R.string.dark)
         )
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val sharedPref =
-            this.activity?.getSharedPreferences("app_settings", AppCompatActivity.MODE_PRIVATE)
-        val editor = sharedPref?.edit()
+        lifecycleScope.launch {
+            viewModelSettings.appThemePreferencesFlow.collect { themePreferences ->
+                savedTheme = themePreferences.theme
+            }
+        }
 
-        var selectedItemIndex = sharedPref?.getInt("theme_radio_button", 0) ?: 0
+        val selectedItemIndex = themeMap.keys.indexOf(savedTheme)
 
         return MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.theme))
-            .setSingleChoiceItems(themeList, selectedItemIndex) { _, which ->
-                selectedItemIndex = which
+            .setSingleChoiceItems(themeMap.values.toTypedArray(), selectedItemIndex)
+            { _, which ->
+                savedTheme = themeMap.keys.elementAt(which)
 
-                editor?.apply {
-                    putInt("theme_radio_button", selectedItemIndex)
-                    apply()
-                }
-
-                val indexData = selectedItemIndex
+                val themeToSave = savedTheme
+                viewModelSettings.saveThemePreferences(themeToSave)
                 parentFragmentManager.setFragmentResult(
-                    REQUEST_KEY, bundleOf(KEY_THEME_RESPONSE to indexData)
+                    REQUEST_KEY, bundleOf(KEY_THEME_RESPONSE to themeToSave)
                 )
             }
-            .setPositiveButton(getString(R.string.ok)) { _, _ ->
-                editor?.apply {
-                    putInt("theme_radio_button", selectedItemIndex)
-                    apply()
-                }
-            }
+            .setPositiveButton(getString(R.string.ok)) { _, _ -> }
             .create()
     }
 

@@ -2,7 +2,7 @@ package com.example.songbook.ui.home.songs
 
 import androidx.lifecycle.*
 import com.example.songbook.data.Song
-import com.example.songbook.data.SongDao
+import com.example.songbook.repo.SongsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,16 +14,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SongsViewModel @Inject constructor(
-    private val songDao: SongDao
+    private val songsRepository: SongsRepository
 ) : ViewModel() {
 
     private var receivedBandName: String? = "band"
 
     val searchQuery = MutableStateFlow("")
 
-    // flow that receives songs by receivedBandName and search it via searchView
     private val songsFlow = searchQuery.flatMapLatest { query ->
-        songDao.getSongByBand(query, receivedBandName!!).map { songList ->
+        songsRepository.getSongsOfTheBand(query, receivedBandName!!).map { songList ->
             songList.toSet().toList()
         }
     }
@@ -43,7 +42,7 @@ class SongsViewModel @Inject constructor(
     }
 
     fun addToFavorite(song: Song, isFavorite: Boolean) = viewModelScope.launch {
-        songDao.update(song.copy(isFavorite = isFavorite))
+        songsRepository.addToFavorite(song, isFavorite)
     }
 
     sealed class SongsEvent {

@@ -2,35 +2,29 @@ package com.example.songbook.ui.favorite.favoriteSongs
 
 import androidx.lifecycle.*
 import com.example.songbook.data.Song
-import com.example.songbook.data.SongDao
+import com.example.songbook.repo.SongsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class FavoriteSongsViewModel @Inject constructor(
-    private val songDao: SongDao
+    private val songsRepository: SongsRepository
 ) : ViewModel() {
 
-    private var receivedBandName: String? = "band"
+    private var receivedBandName: String = "band"
 
     val searchQuery = MutableStateFlow("")
 
-    // flow that receives songs by receivedBandName and search it via searchView
-    private val songsFlow = searchQuery.flatMapLatest { query ->
-        songDao.getSongByBand(query, receivedBandName!!).map { songList ->
-            songList.filter { song ->
-                song.isFavorite
-            }.toSet().toList()
-        }
+    private val _favSongsFlow = searchQuery.flatMapLatest { query ->
+        songsRepository.getFavoriteSongsOfTheBand(query, receivedBandName)
     }
 
-    val songs = songsFlow.asLiveData()
+    val favSongs = _favSongsFlow.asLiveData()
 
     private val songsEventChannel = Channel<SongsEvent>()
     val songsEvent = songsEventChannel.receiveAsFlow()
@@ -44,7 +38,7 @@ class FavoriteSongsViewModel @Inject constructor(
     }
 
     fun addToFavorite(song: Song, isFavorite: Boolean) = viewModelScope.launch {
-        songDao.update(song.copy(isFavorite = isFavorite))
+        songsRepository.addToFavorite(song, isFavorite)
     }
 
     sealed class SongsEvent {

@@ -21,13 +21,13 @@ import com.example.songbook.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class FavoriteSongsFragment : Fragment(), OnSongClickListener{
+class FavoriteSongsFragment : Fragment(), OnSongClickListener {
 
     private var _binding: FragmentFavoriteSongsBinding? = null
     private lateinit var searchView: SearchView
     private val args: FavoriteSongsFragmentArgs by navArgs()
 
-    private val viewModel : FavoriteSongsViewModel by viewModels()
+    private val viewModel: FavoriteSongsViewModel by viewModels()
 
     private val binding get() = _binding!!
 
@@ -50,7 +50,7 @@ class FavoriteSongsFragment : Fragment(), OnSongClickListener{
             adapter = songAdapter
         }
 
-        viewModel.songs.observe(viewLifecycleOwner) { songList ->
+        viewModel.favSongs.observe(viewLifecycleOwner) { songList ->
             songAdapter.submitList(songList)
         }
 
@@ -60,8 +60,11 @@ class FavoriteSongsFragment : Fragment(), OnSongClickListener{
             viewModel.songsEvent.collect() { event ->
                 when (event) {
                     is FavoriteSongsViewModel.SongsEvent.NavigateToSingleSongScreen -> {
-                        val action = FavoriteSongsFragmentDirections.actionFavoriteSongsFragmentToSingleSongFragment(
-                            event.song, event.song.songName)
+                        val action =
+                            FavoriteSongsFragmentDirections.actionFavoriteSongsFragmentToSingleSongFragment(
+                                event.song,
+                                event.song.songName // to set name in toolbar
+                            )
                         findNavController().navigate(action)
                     }
                 }
@@ -77,6 +80,7 @@ class FavoriteSongsFragment : Fragment(), OnSongClickListener{
                 val searchIcon = menu.findItem(R.id.action_search)
                 searchIcon.isVisible = true
             }
+
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_app_bar, menu)
 
@@ -86,7 +90,7 @@ class FavoriteSongsFragment : Fragment(), OnSongClickListener{
                 val pendingQuery = viewModel.searchQuery.value
                 if (pendingQuery.isNotEmpty()) {
                     search.expandActionView()
-                    searchView.setQuery(pendingQuery,false)
+                    searchView.setQuery(pendingQuery, false)
                 }
                 searchView.onQueryTextChanged {
                     viewModel.searchQuery.value = it
